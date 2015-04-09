@@ -20,15 +20,6 @@
 
 #define FORMAT(format, ...) [NSString stringWithFormat:(format), ##__VA_ARGS__]
 
-/*
-#define TICK NSDate *startTime = [NSDate date]
-#define TOCK NSLog(@"%s Time: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
-#define TOCK1 NSLog(@"%s Time1: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
-#define TOCK2 NSLog(@"%s Time2: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
-#define TOCK3 NSLog(@"%s Time3: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
-#define TOCK4 NSLog(@"%s Time4: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
-*/
-
 #define INFO_PORT_NUMBER 7769
 
 // Broadcast
@@ -253,14 +244,14 @@ struct AudioFormat {
     SeqId *currSeqIdB = [[SeqId alloc] initWithInt:0x7FFE];
     //if (currSeqIdA == currSeqIdB) {
     if ([currSeqIdA isEqualTo:currSeqIdB]) {
-        NSLog(@"A==B");
+        //NSLog(@"A==B");
     //} else if (currSeqIdA < currSeqIdB) {
     } else if ([currSeqIdA isLessThan:currSeqIdB]) {
-        NSLog(@"A<B");
+        //NSLog(@"A<B");
     } else if ([currSeqIdA isGreaterThan:currSeqIdB]) {
-        NSLog(@"A>B");
+        //NSLog(@"A>B");
     } else {
-        NSLog(@"Uh ohh!!!!!!!! A>  < == != B");
+        //NSLog(@"Uh ohh!!!!!!!! A>  < == != B");
     }
     */
 
@@ -417,7 +408,7 @@ struct AudioFormat {
     
     // Read max audio delay from GUI
     maxAudioDelaySecs = [self.tfMaxAudioDelaySecs.text floatValue];
-    //NSLog(@"maxAudioDelaySecs: %f", maxAudioDelaySecs);
+    ////NSLog(@"maxAudioDelaySecs: %f", maxAudioDelaySecs);
     
     // Start or Create/Start Audio Controller
     if (self.audioController != nil) {
@@ -461,7 +452,7 @@ struct AudioFormat {
     
     
     // For Debug
-    //NSLog(@"uniqueIdentifier: %@", [[UIDevice currentDevice] uniqueIdentifier]);
+    ////NSLog(@"uniqueIdentifier: %@", [[UIDevice currentDevice] uniqueIdentifier]);
     /*
     NSLog(@"name: %@", [[UIDevice currentDevice] name]);
     NSLog(@"systemName: %@", [[UIDevice currentDevice] systemName]);
@@ -624,10 +615,10 @@ struct AudioFormat {
     [GCDAsyncUdpSocket getHost:&udpDataHost port:&udpDataPort fromAddress:address];
     serverHostIp = udpDataHost;
     
-    NSLog(@"==================================");
+    //NSLog(@"==================================");
     
     if (isBurstMode) {
-        NSLog(@"Resetting burstModeWatchdogTimer");
+        //NSLog(@"Resetting burstModeWatchdogTimer");
         // Reset watchdog timer
         if (burstModeWatchdogTimer != nil) {
             [burstModeWatchdogTimer invalidate];
@@ -637,7 +628,7 @@ struct AudioFormat {
     }
     
     if (udpDataPort == INFO_PORT_NUMBER) {
-        NSLog(@"udpDataPort == INFO_PORT_NUMBER");
+        //NSLog(@"udpDataPort == INFO_PORT_NUMBER");
         isServerStreaming = YES;
         self.waitingForServerLabel.hidden = YES;  // Hide the "Waiting for Server to Stream" label
         self.streamView.hidden = NO;  // Show the streamView (lang selection, "start listening" button, etc)
@@ -669,10 +660,10 @@ struct AudioFormat {
                     [langPortPairs addPairWithLanguage:language AndPort:port];  // Note: only adds it if it doesn't exist already.
                 }
             }
-            //NSLog(@"Now the langPortPairs array looks like this: %@", [langPortPairs toString]);
+            ////NSLog(@"Now the langPortPairs array looks like this: %@", [langPortPairs toString]);
             
             // Init the languageTF just the very first time, when it doesn't have anything in it yet.
-            //NSLog(@"langTF.text: %@", self.languageTF.text);
+            ////NSLog(@"langTF.text: %@", self.languageTF.text);
             if (self.languageTF.text == NULL || [self.languageTF.text isEqualToString:@""]) {
                 // Select the 1st language in the list to display in the Text Field
                 self.languageTF.text = [langPortPairs getLanguageAtIdx:0];
@@ -690,7 +681,7 @@ struct AudioFormat {
         if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_FORMAT) {
             
             // Audio Format packet
-            NSLog(@"AUDIO FORMAT Packet");
+            //NSLog(@"AUDIO FORMAT Packet");
             
             // Set afdg vars
             uint32_t afdgSampleRate = [Util getUInt32FromData:dgData AtOffset:AFDG_SAMPLE_RATE_START BigEndian:NO];
@@ -733,7 +724,7 @@ struct AudioFormat {
             }
         } else {
             // Must be Audio Data packet
-            NSLog(@"AUDIO DATA packet");
+            //NSLog(@"AUDIO DATA packet");
             
             audioDataPort = udpDataPort;
             
@@ -741,7 +732,7 @@ struct AudioFormat {
             //mprDelayCtr--;
             
             if (!isReceivingAudio) {
-                NSLog(@"Receiving audio again");
+                //NSLog(@"Receiving audio again");
                 [self.lblReceivingAudio setTextColor:colorGreen];
             }
             isReceivingAudio = YES;
@@ -790,27 +781,27 @@ struct AudioFormat {
                 
                 /*
                 uint16_t audioDataSeqId =[Util getUInt16FromData:data AtOffset:ADPL_HEADER_SEQ_ID_START BigEndian:NO];
-                //NSLog(@"audioDataSeqId: %d", audioDataSeqId);
+                ////NSLog(@"audioDataSeqId: %d", audioDataSeqId);
 
                 if (!firstPacketReceived) {
-                    NSLog(@"First Packet JUST received (not counting any SKIPPED packets)");
+                    //NSLog(@"First Packet JUST received (not counting any SKIPPED packets)");
                     firstPacketReceived = YES;
                 } else if (audioDataSeqId > lastAudioDataSeqId + 1) {
                     numSkippedPackets = audioDataSeqId - lastAudioDataSeqId - 1;
-                    NSLog(@"%d packets SKIPPED! LastId: 0x%04x, CurrId: 0x%04x", numSkippedPackets, lastAudioDataSeqId, audioDataSeqId);
+                    //NSLog(@"%d packets SKIPPED! LastId: 0x%04x, CurrId: 0x%04x", numSkippedPackets, lastAudioDataSeqId, audioDataSeqId);
                     
                     // Submit a Missing Packets Request
                     NSMutableArray *missingPacketsSeqIds = [[NSMutableArray alloc] init];
                     for (int i = 0; i < numSkippedPackets; i++) {
                         [missingPacketsSeqIds addObject:[NSNumber numberWithInt:lastAudioDataSeqId + 1 + i]];
                     }
-                    NSLog(@" Sending missing packets request with port:%d, and missing packets: %@", port, [self getMissingPacketsSeqIdsAsHexString:missingPacketsSeqIds]);
+                    //NSLog(@" Sending missing packets request with port:%d, and missing packets: %@", port, [self getMissingPacketsSeqIdsAsHexString:missingPacketsSeqIds]);
                     [self sendMissingPacketsRequestWithPort:port AndMissingPackets:missingPacketsSeqIds];
                     
                 } else if (audioDataSeqId == lastAudioDataSeqId) {
-                    NSLog(@"Packet received with SAME SeqId as last packet! Shouldn't happen! Id: 0x%04x", audioDataSeqId);
+                    //NSLog(@"Packet received with SAME SeqId as last packet! Shouldn't happen! Id: 0x%04x", audioDataSeqId);
                 } else if (audioDataSeqId < lastAudioDataSeqId && !(audioDataSeqId == 0 && lastAudioDataSeqId == 0xFFFF)) {
-                    NSLog(@"Packet received OUT OF ORDER! LastId: 0x%04x, CurrId: 0x%04x", lastAudioDataSeqId, audioDataSeqId);
+                    //NSLog(@"Packet received OUT OF ORDER! LastId: 0x%04x, CurrId: 0x%04x", lastAudioDataSeqId, audioDataSeqId);
                     //lastAudioDataSeqId = audioDataSeqId;
                     return; // Don't add this packet to buffer - just to prevent a bit of an audio stutter.
                 }
@@ -820,9 +811,9 @@ struct AudioFormat {
                 
                 
                 /*
-                //NSLog(@"[%@] <- pre-missingPacketsSeqIdsList", [self getMissingPacketsSeqIdsAsHexString:missingPacketsSeqIdsList]);
-                //NSLog(@"[%@] <- pre-pcmAudioDataPayloadStorageList(SeqId's)", [self getAllSeqIdsInPcmAudioDataPayloadStorageListAsHexString:pcmAudioDataPayloadStorageList]);
-                NSLog(@"[%@] <- pre-payloadStorageList", [payloadStorageList toString]);
+                ////NSLog(@"[%@] <- pre-missingPacketsSeqIdsList", [self getMissingPacketsSeqIdsAsHexString:missingPacketsSeqIdsList]);
+                ////NSLog(@"[%@] <- pre-pcmAudioDataPayloadStorageList(SeqId's)", [self getAllSeqIdsInPcmAudioDataPayloadStorageListAsHexString:pcmAudioDataPayloadStorageList]);
+                //NSLog(@"[%@] <- pre-payloadStorageList", [payloadStorageList toString]);
                 
                 //uint16_t currSeqId = [Util getUInt16FromData:dgData AtOffset:ADPL_HEADER_SEQ_ID_START BigEndian:NO];
                 //uint16_t currSeqId = pcmAudioDataPayload.seqId;
@@ -831,33 +822,33 @@ struct AudioFormat {
                 
                 
                 if (!firstPacketReceived) {
-                    NSLog(@"First Packet (0x%04x) JUST received (not counting any SKIPPED packets)", currSeqId.intValue);
+                    //NSLog(@"First Packet (0x%04x) JUST received (not counting any SKIPPED packets)", currSeqId.intValue);
                     firstPacketReceived = YES;
                     queueThisPacket = YES;
                 //} else if (currSeqId <= lastQueuedSeqId) {
                 } else if ([currSeqId isLessThanOrEqualToSeqId:lastQueuedSeqId]) {
-                    NSLog(@"This Packet (0x%04x) has already been received & Queued to be played. Not doing anything with the packet.", currSeqId.intValue);
+                    //NSLog(@"This Packet (0x%04x) has already been received & Queued to be played. Not doing anything with the packet.", currSeqId.intValue);
                     queueThisPacket = NO;
                 //} else if (currSeqId == lastQueuedSeqId + 1) {
                 } else if ([currSeqId isEqualToSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
-                    NSLog(@"This packet (0x%04x) is next in line for the Play Queue.", currSeqId.intValue);
+                    //NSLog(@"This packet (0x%04x) is next in line for the Play Queue.", currSeqId.intValue);
                     //if (missingPacketsSeqIdsList.count > 0) {
                     if ([payloadStorageList hasMissingPayloadAtFirstElement]) {
-                        //NSLog(@" there are some missing packets (%d). Checking them.", (int)missingPacketsSeqIdsList.count);
-                        NSLog(@" there's a missing packet at front of payloadStorageList. Checking it.");
+                        ////NSLog(@" there are some missing packets (%d). Checking them.", (int)missingPacketsSeqIdsList.count);
+                        //NSLog(@" there's a missing packet at front of payloadStorageList. Checking it.");
                         //if (((NSNumber*)missingPacketsSeqIdsList[0]).intValue == currSeqId) {
                         if ([(SeqId*)missingPacketsSeqIdsList[0] isEqualToSeqId:currSeqId]) {
-                            NSLog(@"  Looks like it (0x%04x) was a 'missing packet' - GREAT, the Server sent it again! Queing it up & Removing it from missingPacketsSeqIdsList", currSeqId.intValue);
+                            //NSLog(@"  Looks like it (0x%04x) was a 'missing packet' - GREAT, the Server sent it again! Queing it up & Removing it from missingPacketsSeqIdsList", currSeqId.intValue);
                             [missingPacketsSeqIdsList removeObjectAtIndex:0];
                             queueThisPacket = YES;
                             checkForReadyToQueuePacketsInStorageList = YES;
                             skipMissingPacketsRequestThisTimeThrough = YES;  // Because there might be more missing packets coming right after this one, and we shouldn't bug the Server 10 times if 10 packets are missing.
                         } else {
-                            NSLog(@"  !!! Don't think we should get here! This packet's next in line for Play Queue, missingPacketsSeqIdsList.count > 0, missingPacketsSeqIdsList[0] should ALWAYS be this packet. currSeqId: 0x%04x, missingPacketsSeqIdsList[0]: 0x%04x", currSeqId.intValue, ((SeqId*)missingPacketsSeqIdsList[0]).intValue);
+                            //NSLog(@"  !!! Don't think we should get here! This packet's next in line for Play Queue, missingPacketsSeqIdsList.count > 0, missingPacketsSeqIdsList[0] should ALWAYS be this packet. currSeqId: 0x%04x, missingPacketsSeqIdsList[0]: 0x%04x", currSeqId.intValue, ((SeqId*)missingPacketsSeqIdsList[0]).intValue);
                             queueThisPacket = NO;
                         }
                     } else {
-                        NSLog(@" there are NO missing packets. Queing it (0x%04x) up.", currSeqId.intValue);
+                        //NSLog(@" there are NO missing packets. Queing it (0x%04x) up.", currSeqId.intValue);
                         queueThisPacket = YES;
                     }
                 //} else if (currSeqId > lastQueuedSeqId + 1) {
@@ -866,33 +857,33 @@ struct AudioFormat {
                     //numSkippedPackets = currSeqId.intValue - lastQueuedSeqId.intValue - 1;
                     //numSkippedPackets = [currSeqId minus:lastQueuedSeqId].intValue - 1;
                     numSkippedPackets = [currSeqId numIdsExclusivelyBetweenMeAndSeqId:lastQueuedSeqId];
-                    //NSLog(@"SKIPPED %d packet(s). Updating missingPacketsSeqIdsList & dgDataStorageList as apporpriate", numSkippedPackets);
-                    NSLog(@"%d packet(s) between NOW (0x%04x) and LAST_QUEUED (0x%04x). Updating missingPacketsSeqIdsList & dgDataStorageList as appropriate", numSkippedPackets, currSeqId.intValue, lastQueuedSeqId.intValue);
+                    ////NSLog(@"SKIPPED %d packet(s). Updating missingPacketsSeqIdsList & dgDataStorageList as apporpriate", numSkippedPackets);
+                    //NSLog(@"%d packet(s) between NOW (0x%04x) and LAST_QUEUED (0x%04x). Updating missingPacketsSeqIdsList & dgDataStorageList as appropriate", numSkippedPackets, currSeqId.intValue, lastQueuedSeqId.intValue);
                     // Note: make sure to add in sort order
-                    //NSLog(@" Adding missing packet(s) to missingPacketsSeqIdsList (if appropriate)");
+                    ////NSLog(@" Adding missing packet(s) to missingPacketsSeqIdsList (if appropriate)");
                     for (int i = 0; i < numSkippedPackets; i++) {
                         //NSNumber *missingSeqId = [NSNumber numberWithInt:lastQueuedSeqId + i];
                         SeqId *missingSeqId = [[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1 + i];
                         
                         if (![missingPacketsSeqIdsList containsObject:missingSeqId] && ![pcmAudioDataPayloadStorageList containsObject:[[PcmAudioDataPayload alloc] initWithSeqId:missingSeqId]]) {
-                            NSLog(@" Adding packet (0x%04x) to missingPacketsSeqIdsList (and sorting list)", missingSeqId.intValue);
+                            //NSLog(@" Adding packet (0x%04x) to missingPacketsSeqIdsList (and sorting list)", missingSeqId.intValue);
                             // Add it to list
                             [missingPacketsSeqIdsList addObject:missingSeqId];
                             // Sort list
                             NSSortDescriptor *lowestToHighest = [NSSortDescriptor sortDescriptorWithKey:@"self" ascending:YES];
                             [missingPacketsSeqIdsList sortUsingDescriptors:[NSArray arrayWithObject:lowestToHighest]];
                         } else {
-                            NSLog(@" missingPacketsSeqIdsList OR pcmAudioDataPayloadStorageList already contains packet (0x%04x). Not adding again.", missingSeqId.intValue);
+                            //NSLog(@" missingPacketsSeqIdsList OR pcmAudioDataPayloadStorageList already contains packet (0x%04x). Not adding again.", missingSeqId.intValue);
                         }
                     }
                     
                     if (![pcmAudioDataPayloadStorageList containsObject:[[PcmAudioDataPayload alloc] initWithSeqId:currSeqId]]) {
-                        NSLog(@" Adding our received packet (0x%04x) to pcmAudioDataPayloadStorageList & sorting", currSeqId.intValue);
+                        //NSLog(@" Adding our received packet (0x%04x) to pcmAudioDataPayloadStorageList & sorting", currSeqId.intValue);
                         [pcmAudioDataPayloadStorageList addObject:pcmAudioDataPayload];
                         //[pcmAudioDataPayloadStorageList sortedArrayUsingSelector:@selector(compare:)];
                         [pcmAudioDataPayloadStorageList sortUsingSelector:@selector(compare:)];
                     } else {
-                        NSLog(@" Our received packet (0x%04x) has already been added to pcmAudioDataPayloadStorageList. Not adding again.", currSeqId.intValue);
+                        //NSLog(@" Our received packet (0x%04x) has already been added to pcmAudioDataPayloadStorageList. Not adding again.", currSeqId.intValue);
                     }
                     
                     queueThisPacket = NO;
@@ -900,7 +891,7 @@ struct AudioFormat {
 
                 // Submit a Missing Packets Request (if we have any missing packets) // Note: MAYBE don't want to do this EVERY time, but it also shouldn't hurt...
                 if (!skipMissingPacketsRequestThisTimeThrough && missingPacketsSeqIdsList.count > 0) {
-                    NSLog(@" Sending Missing Packets Request with port:%d, and missing packets: %@", port, [self getMissingPacketsSeqIdsAsHexString:missingPacketsSeqIdsList]);
+                    //NSLog(@" Sending Missing Packets Request with port:%d, and missing packets: %@", port, [self getMissingPacketsSeqIdsAsHexString:missingPacketsSeqIdsList]);
                     [self sendMissingPacketsRequestWithPort:port AndMissingPackets:missingPacketsSeqIdsList];
                 }
                 
@@ -918,17 +909,17 @@ struct AudioFormat {
                 }
                 
                 if (checkForReadyToQueuePacketsInStorageList) {
-                    NSLog(@"checking for ready-to-quque packets in StorageList");
+                    //NSLog(@"checking for ready-to-quque packets in StorageList");
                     if (pcmAudioDataPayloadStorageList.count > 0) {
-                        NSLog(@" found %d in StorageList", (int)pcmAudioDataPayloadStorageList.count);
+                        //NSLog(@" found %d in StorageList", (int)pcmAudioDataPayloadStorageList.count);
                         //if ( ((PcmAudioDataPayload*)payloadStorageList[0]).seqId == lastQueuedSeqId + 1 ) {
                         //uint16_t storedSeqId0 = [Util getUInt16FromData:(NSData*)pcmAudioDataPayloadStorageList[0] AtOffset:ADPL_HEADER_SEQ_ID_START BigEndian:NO];
                         //uint16_t storedSeqId0 = ((PcmAudioDataPayload*)pcmAudioDataPayloadStorageList[0]).seqId;
                         SeqId *storedSeqId0 = ((PcmAudioDataPayload*)pcmAudioDataPayloadStorageList[0]).seqId;
-                        NSLog(@" storedSeqId0: 0x%04x", storedSeqId0.intValue);
+                        //NSLog(@" storedSeqId0: 0x%04x", storedSeqId0.intValue);
                         //while (storedSeqId0 == lastQueuedSeqId + 1) {
                         while ([storedSeqId0 isEqualToSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
-                            NSLog(@"  Great! We've got a packet (0x%04x) in the StorageList that we can queue up now. Queueing it & Removing from Storage.", storedSeqId0.intValue);
+                            //NSLog(@"  Great! We've got a packet (0x%04x) in the StorageList that we can queue up now. Queueing it & Removing from Storage.", storedSeqId0.intValue);
                             // Queue it up!
                             //uint16_t storedAudioDataLength = [Util getUInt16FromData:(NSData*)pcmAudioDataPayloadStorageList[0] AtOffset:ADPL_HEADER_AUDIO_DATA_ALLOCATED_BYTES_START BigEndian:NO];
                             //NSData *storedAudioData = [(NSData*)pcmAudioDataPayloadStorageList[0] subdataWithRange:NSMakeRange(ADPL_AUDIO_DATA_START, storedAudioDataLength)];
@@ -952,95 +943,29 @@ struct AudioFormat {
                 */
                 
 
-                //NSLog(@"==================================");
-                NSLog(@"pre-payloadStorageList(%d) -> [%@]", [payloadStorageList getSize], [payloadStorageList toString]);
-                /*
-                TICK;
-                int ctr = 0;
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
+                ////NSLog(@"==================================");
+                //NSLog(@"pre-payloadStorageList(%d) -> [%@]", [payloadStorageList getSize], [payloadStorageList toString]);
                 
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                NSLog(@"TESTing%d", ctr++);
-                TOCK;
-                */
                 SeqId *currSeqId = pcmAudioDataPayload.seqId;
                 
-                NSLog(@"Received Audio Packet: (0x%04x) {%@}", currSeqId.intValue, [Util getUInt8FromData:dgData AtOffset:DG_DATA_HEADER_PAYLOAD_TYPE_START] == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING ? @"Missing" : @"Regular");
+                //NSLog(@"Received Audio Packet: (0x%04x) {%@}", currSeqId.intValue, [Util getUInt8FromData:dgData AtOffset:DG_DATA_HEADER_PAYLOAD_TYPE_START] == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING ? @"Missing" : @"Regular");
                 
                 mprDelayTimer--;
                 if (mprDelayTimer < 0) { mprDelayTimer = 0; }
-                TICK;
+                
                 if (!firstPacketReceived) {
-                    NSLog(@"First Packet (0x%04x) JUST received (not counting any SKIPPED packets)", currSeqId.intValue);
+                    //NSLog(@"First Packet (0x%04x) JUST received (not counting any SKIPPED packets)", currSeqId.intValue);
                     firstPacketReceived = YES;
                     //queueThisPacket = YES;
                     [self queueThisPayload:pcmAudioDataPayload];
                 } else if ([currSeqId isLessThanOrEqualToSeqId:lastQueuedSeqId]) {
-                    NSLog(@"This Packet (0x%04x) has already been received & Queued to be played. Not doing anything with the packet.", currSeqId.intValue);
+                    //NSLog(@"This Packet (0x%04x) has already been received & Queued to be played. Not doing anything with the packet.", currSeqId.intValue);
                     //queueThisPacket = NO;
                 } else if ([currSeqId isEqualToSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
-                    NSLog(@"This packet (0x%04x) is next in line for the Play Queue.", currSeqId.intValue);
+                    //NSLog(@"This packet (0x%04x) is next in line for the Play Queue.", currSeqId.intValue);
 
                     if ([payloadStorageList hasMissingPayloadAtFirstElementWithThisSeqId:currSeqId]) {
-                        NSLog(@" Looks like it (0x%04x) was a 'missing packet' - GREAT, the Server sent it again! Regular or Missing: (%@). Queing it up & Removing it from missingPacketsSeqIdsList", currSeqId.intValue, [Util getUInt8FromData:dgData AtOffset:DG_DATA_HEADER_PAYLOAD_TYPE_START] == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING ? @"M" : @"R");
+                        //NSLog(@" Looks like it (0x%04x) was a 'missing packet' - GREAT, the Server sent it again! Regular or Missing: (%@). Queing it up & Removing it from missingPacketsSeqIdsList", currSeqId.intValue, [Util getUInt8FromData:dgData AtOffset:DG_DATA_HEADER_PAYLOAD_TYPE_START] == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING ? @"M" : @"R");
                         
                         //isWaitingOnMissingPacket = NO;
                         mprDelayTimer = MPR_DELAY_RESET;
@@ -1054,50 +979,49 @@ struct AudioFormat {
                         
                         if ([payloadStorageList getSize] == 0) {
                             isWaitingOnMissingPackets = NO;
-                            NSLog(@"NOT WAITING on Missing Packet(s) anymore!");
+                            //NSLog(@"NOT WAITING on Missing Packet(s) anymore!");
                         } else {
-                            NSLog(@"STILL WAITING on Missing Packet(s)!");
+                            //NSLog(@"STILL WAITING on Missing Packet(s)!");
                         }
                         
                         skipMissingPacketsRequestThisTimeThrough = YES;  // Because there might be more missing packets coming right after this one, and we shouldn't bug the Server 10 times if 10 packets are missing.
                     } else {
                         // Check that we're in a good state
                         if ([payloadStorageList hasMissingPayloadAtFirstElement]) {
-                            NSLog(@" !!! Don't think we should get here! This packet (0x%04x) is next in line for Play Queue, but we have a missing payload (0x%04x) at the front of the StorageList. Anything 'missing' at the front of the StorageList should be holding up audio playback.", currSeqId.intValue, [payloadStorageList getFirstPayload].seqId.intValue);
+                            //NSLog(@" !!! Don't think we should get here! This packet (0x%04x) is next in line for Play Queue, but we have a missing payload (0x%04x) at the front of the StorageList. Anything 'missing' at the front of the StorageList should be holding up audio playback.", currSeqId.intValue, [payloadStorageList getFirstPayload].seqId.intValue);
                         } else {
-                            NSLog(@" there are NO missing packets at front of StorageList. Queing it (0x%04x) up to be played.", currSeqId.intValue);
+                            //NSLog(@" there are NO missing packets at front of StorageList. Queing it (0x%04x) up to be played.", currSeqId.intValue);
                             [self queueThisPayload:pcmAudioDataPayload];
                         }
                     }
-                    TOCK2;
                     
                     /*
                     if ([payloadStorageList hasMissingPayloadAtFirstElement]) {
-                        //NSLog(@" there are some missing packets (%d). Checking them.", (int)missingPacketsSeqIdsList.count);
-                        NSLog(@" there's a missing packet at front of payloadStorageList. Checking it.");
+                        ////NSLog(@" there are some missing packets (%d). Checking them.", (int)missingPacketsSeqIdsList.count);
+                        //NSLog(@" there's a missing packet at front of payloadStorageList. Checking it.");
                         //if (((NSNumber*)missingPacketsSeqIdsList[0]).intValue == currSeqId) {
                         if ([(SeqId*)missingPacketsSeqIdsList[0] isEqualToSeqId:currSeqId]) {
-                            NSLog(@"  Looks like it (0x%04x) was a 'missing packet' - GREAT, the Server sent it again! Queing it up & Removing it from missingPacketsSeqIdsList", currSeqId.intValue);
+                            //NSLog(@"  Looks like it (0x%04x) was a 'missing packet' - GREAT, the Server sent it again! Queing it up & Removing it from missingPacketsSeqIdsList", currSeqId.intValue);
                             [missingPacketsSeqIdsList removeObjectAtIndex:0];
                             queueThisPacket = YES;
                             checkForReadyToQueuePacketsInStorageList = YES;
                             skipMissingPacketsRequestThisTimeThrough = YES;  // Because there might be more missing packets coming right after this one, and we shouldn't bug the Server 10 times if 10 packets are missing.
                         } else {
-                            NSLog(@"  !!! Don't think we should get here! This packet's next in line for Play Queue, missingPacketsSeqIdsList.count > 0, missingPacketsSeqIdsList[0] should ALWAYS be this packet. currSeqId: 0x%04x, missingPacketsSeqIdsList[0]: 0x%04x", currSeqId.intValue, ((SeqId*)missingPacketsSeqIdsList[0]).intValue);
+                            //NSLog(@"  !!! Don't think we should get here! This packet's next in line for Play Queue, missingPacketsSeqIdsList.count > 0, missingPacketsSeqIdsList[0] should ALWAYS be this packet. currSeqId: 0x%04x, missingPacketsSeqIdsList[0]: 0x%04x", currSeqId.intValue, ((SeqId*)missingPacketsSeqIdsList[0]).intValue);
                             queueThisPacket = NO;
                         }
                     } else {
-                        NSLog(@" there are NO missing packets. Queing it (0x%04x) up.", currSeqId.intValue);
+                        //NSLog(@" there are NO missing packets. Queing it (0x%04x) up.", currSeqId.intValue);
                         queueThisPacket = YES;
                     }
                     */
                 } else if ([currSeqId isGreaterThanSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
 
                     numSkippedPackets = [currSeqId numSeqIdsExclusivelyBetweenMeAndSeqId:lastQueuedSeqId];
-                    NSLog(@"%d packet(s) between NOW (0x%04x) and LAST_QUEUED (0x%04x). Updating payloadStorageList as appropriate", numSkippedPackets, currSeqId.intValue, lastQueuedSeqId.intValue);
+                    //NSLog(@"%d packet(s) between NOW (0x%04x) and LAST_QUEUED (0x%04x). Updating payloadStorageList as appropriate", numSkippedPackets, currSeqId.intValue, lastQueuedSeqId.intValue);
                     
                     if (!isBurstMode) {
-                        NSLog(@"---Burst Mode Started---");
+                        //NSLog(@"---Burst Mode Started---");
                     }
                     isBurstMode = YES;
                     
@@ -1123,7 +1047,7 @@ struct AudioFormat {
                     //isWaitingOnMissingPacket = YES;
                     
                     if (addMissingPackets) {
-                        NSLog(@"ADDING Missing Packets Range to payloadStorageList");
+                        //NSLog(@"ADDING Missing Packets Range to payloadStorageList");
                         NSMutableArray *missingPayloadsArr = [[NSMutableArray alloc] init];
                         for (int i = 0; i < numSkippedPackets; i++) {
                             SeqId *missingSeqId = [[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1 + i];
@@ -1131,32 +1055,32 @@ struct AudioFormat {
                             
                             /*
                              if (![missingPacketsSeqIdsList containsObject:missingSeqId] && ![pcmAudioDataPayloadStorageList containsObject:[[PcmAudioDataPayload alloc] initWithSeqId:missingSeqId]]) {
-                             NSLog(@" Adding packet (0x%04x) to missingPacketsSeqIdsList (and sorting list)", missingSeqId.intValue);
+                             //NSLog(@" Adding packet (0x%04x) to missingPacketsSeqIdsList (and sorting list)", missingSeqId.intValue);
                              // Add it to list
                              [missingPacketsSeqIdsList addObject:missingSeqId];
                              // Sort list
                              NSSortDescriptor *lowestToHighest = [NSSortDescriptor sortDescriptorWithKey:@"self" ascending:YES];
                              [missingPacketsSeqIdsList sortUsingDescriptors:[NSArray arrayWithObject:lowestToHighest]];
                              } else {
-                             NSLog(@" missingPacketsSeqIdsList OR pcmAudioDataPayloadStorageList already contains packet (0x%04x). Not adding again.", missingSeqId.intValue);
+                             //NSLog(@" missingPacketsSeqIdsList OR pcmAudioDataPayloadStorageList already contains packet (0x%04x). Not adding again.", missingSeqId.intValue);
                              }
                              */
                             //[payloadStorageList addMissingPayload:[[PcmAudioDataPayload alloc] initWithSeqId:missingSeqId]];
                         }
                         [payloadStorageList addIncrementingMissingPayloads:missingPayloadsArr];
                     } else {
-                        NSLog(@"NOT ADDING Missing Packets Range to payloadStorageList");
+                        //NSLog(@"NOT ADDING Missing Packets Range to payloadStorageList");
                     }
                     
                     
                     // Add received packet
                     /*
                     if (![pcmAudioDataPayloadStorageList containsObject:[[PcmAudioDataPayload alloc] initWithSeqId:currSeqId]]) {
-                        NSLog(@" Adding our received packet (0x%04x) to pcmAudioDataPayloadStorageList & sorting", currSeqId.intValue);
+                        //NSLog(@" Adding our received packet (0x%04x) to pcmAudioDataPayloadStorageList & sorting", currSeqId.intValue);
                         [pcmAudioDataPayloadStorageList addObject:pcmAudioDataPayload];
                         [pcmAudioDataPayloadStorageList sortUsingSelector:@selector(compare:)];
                     } else {
-                        NSLog(@" Our received packet (0x%04x) has already been added to pcmAudioDataPayloadStorageList. Not adding again.", currSeqId.intValue);
+                        //NSLog(@" Our received packet (0x%04x) has already been added to pcmAudioDataPayloadStorageList. Not adding again.", currSeqId.intValue);
                     }
                     queueThisPacket = NO;
                     */
@@ -1166,28 +1090,27 @@ struct AudioFormat {
                     /*
                     if (mprDelayCtr <= 0) {
                         mprDelayCtr = numSkippedPackets + 1;
-                        NSLog(@" Setting *mprDelayCtr* to: %d", mprDelayCtr);
+                        //NSLog(@" Setting *mprDelayCtr* to: %d", mprDelayCtr);
                     }
                     */
                     
                     isWaitingOnMissingPackets = YES;
-                    TOCK3;
                 }
                 
                 /*
-                NSLog(@"Time to send MissingPacketsRequest?");
+                //NSLog(@"Time to send MissingPacketsRequest?");
                 if ([payloadStorageList getMissingPayloads].count > 0) {
-                    NSLog(@" Maybe! There's (%d) missingPayloads", (int)[payloadStorageList getMissingPayloads].count);
+                    //NSLog(@" Maybe! There's (%d) missingPayloads", (int)[payloadStorageList getMissingPayloads].count);
                     if (mprDelayTimer <= 0) {
                         NSArray *missingPayloads = [payloadStorageList getMissingPayloads];
-                        NSLog(@"  Yes! mprDelayTimer Expired => Sending **MISSING PACKETS REQUEST** with port:%d, and ALL missing payloads(%d): %@", port, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
+                        //NSLog(@"  Yes! mprDelayTimer Expired => Sending **MISSING PACKETS REQUEST** with port:%d, and ALL missing payloads(%d): %@", port, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
                         [self sendMissingPacketsRequestWithPort:port AndMissingPayloads:missingPayloads];
                         mprDelayTimer = MPR_DELAY_RESET;
                     } else {
-                        NSLog(@"  No! mprDelayTimer(%d) hasn't expired yet.", mprDelayTimer);
+                        //NSLog(@"  No! mprDelayTimer(%d) hasn't expired yet.", mprDelayTimer);
                     }
                 } else {
-                    NSLog(@" No! There are 0 MissingPayloads.");
+                    //NSLog(@" No! There are 0 MissingPayloads.");
                     mprDelayTimer = MPR_DELAY_RESET + 1;
                 }
                 TOCK4;
@@ -1198,13 +1121,13 @@ struct AudioFormat {
                     if (!isBurstMode) {
                         NSArray *missingPayloads = [payloadStorageList getMissingPayloads];
                         [self sendMissingPacketsRequestWithPort:port AndMissingPayloads:missingPayloads];
-                        NSLog(@"NOT in Burst Mode. Sending **MISSING PACKETS REQUEST** with port:%d, and ALL missing payloads(%d): %@", port, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
+                        //NSLog(@"NOT in Burst Mode. Sending **MISSING PACKETS REQUEST** with port:%d, and ALL missing payloads(%d): %@", port, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
                         
                     } else {
-                        NSLog(@"We're in BURST MODE. Not sending existing Missing Payloads.");
+                        //NSLog(@"We're in BURST MODE. Not sending existing Missing Payloads.");
                     }
                 } else {
-                    NSLog(@"There are 0 MissingPayloads.");
+                    //NSLog(@"There are 0 MissingPayloads.");
                 }
                 */
                 
@@ -1216,17 +1139,17 @@ struct AudioFormat {
                 NSArray *missingPayloads = [payloadStorageList getMissingPayloads];
                 //if (!skipMissingPacketsRequestThisTimeThrough && missingPayloads.count ) {
                 if (mprDelayCtr <= 0) {
-                    NSLog(@" mprDelayCtr is <= 0. (%d). Possible to send Missing Packets Request", mprDelayCtr);
+                    //NSLog(@" mprDelayCtr is <= 0. (%d). Possible to send Missing Packets Request", mprDelayCtr);
                     if ( !skipMissingPacketsRequestThisTimeThrough && missingPayloads.count > 0 ) {
-                        //NSLog(@" Sending Missing Packets Request with port:%d, and missing packets: %@", port, [self getMissingPacketsSeqIdsAsHexString:missingPacketsSeqIdsList]);
-                        NSLog(@"  Sending Missing Packets Request with port:%d, and missing payloads(%d): %@", port, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
+                        ////NSLog(@" Sending Missing Packets Request with port:%d, and missing packets: %@", port, [self getMissingPacketsSeqIdsAsHexString:missingPacketsSeqIdsList]);
+                        //NSLog(@"  Sending Missing Packets Request with port:%d, and missing payloads(%d): %@", port, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
                         //[self sendMissingPacketsRequestWithPort:port AndMissingPackets:missingPacketsSeqIdsList];
                         [self sendMissingPacketsRequestWithPort:port AndMissingPayloads:missingPayloads];
                     } else {
-                        NSLog(@"  Skipping sending Missing Packets Report this time through  OR  missingPayloads.count == 0");
+                        //NSLog(@"  Skipping sending Missing Packets Report this time through  OR  missingPayloads.count == 0");
                     }
                 } else {
-                    NSLog(@" mprDelayCtr is > 0. (%d). Waiting for it to reach 0 or less before sending Missing Packets Report", mprDelayCtr);
+                    //NSLog(@" mprDelayCtr is > 0. (%d). Waiting for it to reach 0 or less before sending Missing Packets Report", mprDelayCtr);
                 }
                 */
                 
@@ -1242,13 +1165,13 @@ struct AudioFormat {
                 
                 /*
                 if (checkForReadyToQueuePacketsInStorageList) {
-                    NSLog(@"checking for ready-to-quque packets in StorageList");
+                    //NSLog(@"checking for ready-to-quque packets in StorageList");
                     if (pcmAudioDataPayloadStorageList.count > 0) {
-                        NSLog(@" found %d in StorageList", (int)pcmAudioDataPayloadStorageList.count);
+                        //NSLog(@" found %d in StorageList", (int)pcmAudioDataPayloadStorageList.count);
                         SeqId *storedSeqId0 = ((PcmAudioDataPayload*)pcmAudioDataPayloadStorageList[0]).seqId;
-                        NSLog(@" storedSeqId0: 0x%04x", storedSeqId0.intValue);
+                        //NSLog(@" storedSeqId0: 0x%04x", storedSeqId0.intValue);
                         while ([storedSeqId0 isEqualToSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
-                            NSLog(@"  Great! We've got a packet (0x%04x) in the StorageList that we can queue up now. Queueing it & Removing from Storage.", storedSeqId0.intValue);
+                            //NSLog(@"  Great! We've got a packet (0x%04x) in the StorageList that we can queue up now. Queueing it & Removing from Storage.", storedSeqId0.intValue);
                             // Queue it up!
                             [self.dgChannel putInCircularBufferAudioData:((PcmAudioDataPayload*)pcmAudioDataPayloadStorageList[0]).audioData];
                             lastQueuedSeqId = storedSeqId0;
@@ -1283,15 +1206,15 @@ struct AudioFormat {
 }
 
 -(void)checkForReadyToQueuePacketsInStorageList {
-    NSLog(@" checking for ready-to-quque packets in StorageList");
+    //NSLog(@" checking for ready-to-quque packets in StorageList");
     while ([payloadStorageList hasFullPayloadAtFirstElementWithThisSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
-        NSLog(@"  Great! We've got a packet (0x%04x) in the StorageList that we can queue up now. Queueing it & Removing from the StorageList.", lastQueuedSeqId.intValue + 1);
+        //NSLog(@"  Great! We've got a packet (0x%04x) in the StorageList that we can queue up now. Queueing it & Removing from the StorageList.", lastQueuedSeqId.intValue + 1);
         [self queueThisPayload:[payloadStorageList popFirstPayload]];
     }
 }
 
 -(void)changePlaybackSpeedIfNeededGivenCurrCircBufferDataSizeSecs:(float)currCircBufferDataSizeSecs {
-    //NSLog(@"changePlaybackSpeedIfNeeded() currCircBuffDataSizeSecs: %f, desiredDelayLabel: %f", currCircBufferDataSizeSecs, self.desiredDelayLabel.text.floatValue);
+    ////NSLog(@"changePlaybackSpeedIfNeeded() currCircBuffDataSizeSecs: %f, desiredDelayLabel: %f", currCircBufferDataSizeSecs, self.desiredDelayLabel.text.floatValue);
     if (currCircBufferDataSizeSecs > self.desiredDelayLabel.text.floatValue + (self.desiredDelayLabel.text.floatValue/2.0)) {
         if (!playFaster) {
             NSLog(@"Time to play FASTER.");
@@ -1370,7 +1293,7 @@ struct AudioFormat {
     
     // Check for possible data loss & warn user if so
     if (i > pow(2, length * 8)) {
-        NSLog(@"*WARNING! Full int will not fit inside byte array! Data lost! i: %d, length: %d", i, length);
+        //NSLog(@"*WARNING! Full int will not fit inside byte array! Data lost! i: %d, length: %d", i, length);
     }
     
     for (int ctr = 0; ctr < length; ctr++) {
@@ -1507,7 +1430,7 @@ struct AudioFormat {
 }
 
 -(void) makeAudioPlayFastSpeed {
-    NSLog(@"Play Fast Speed");
+    NSLog(@"makeAudioPlayFastSpeed()");
     if (isListening) {
         [self.lblPlaybackSpeed setText:[NSString stringWithFormat:@"%1.1fx", FAST_PLAYBACK_SPEED]];
         [self.lblPlaybackSpeed setTextColor:colorBlue];
@@ -1522,7 +1445,7 @@ struct AudioFormat {
 }
 
 -(void) makeAudioPlayNormalSpeed {
-    NSLog(@"Play Normal Speed");
+    NSLog(@"makeAudioPlayNormalSpeed()");
     [self.lblPlaybackSpeed setText:@"1x"];
     [self.lblPlaybackSpeed setTextColor:colorGreen];
     
@@ -1532,7 +1455,7 @@ struct AudioFormat {
 }
 
 -(void) makeAudioPlaySlowSpeed {
-    NSLog(@"Play Slow Speed");
+    NSLog(@"makeAudioPlaySlowSpeed()");
     if (isListening) {
         [self.lblPlaybackSpeed setText:[NSString stringWithFormat:@"%1.1fx", SLOW_PLAYBACK_SPEED]];
         [self.lblPlaybackSpeed setTextColor:colorYellow];
@@ -1552,13 +1475,13 @@ struct AudioFormat {
     // see CNCopyCurrentNetworkInfo
     
     NSArray *interfaceNames = CFBridgingRelease(CNCopySupportedInterfaces());
-    //NSLog(@"%s: Supported interfaces: %@", __func__, interfaceNames);
+    ////NSLog(@"%s: Supported interfaces: %@", __func__, interfaceNames);
     
     NSDictionary *SSIDInfo;
     for (NSString *interfaceName in interfaceNames) {
         SSIDInfo = CFBridgingRelease(
                                      CNCopyCurrentNetworkInfo((__bridge CFStringRef)interfaceName));
-        //NSLog(@"%s: %@ => %@", __func__, interfaceName, SSIDInfo);
+        ////NSLog(@"%s: %@ => %@", __func__, interfaceName, SSIDInfo);
         
         BOOL isNotEmpty = (SSIDInfo.count > 0);
         if (isNotEmpty) {
@@ -1577,7 +1500,7 @@ struct AudioFormat {
 }
 
 -(NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component {
-    //NSLog(@"pickerRow: %d, langAtThisIdx: %@, langPortPair: %@", (int)row, [langPortPairs getLanguageAtIdx:(int)row], [langPortPairs toString]);
+    ////NSLog(@"pickerRow: %d, langAtThisIdx: %@, langPortPair: %@", (int)row, [langPortPairs getLanguageAtIdx:(int)row], [langPortPairs toString]);
 
     return [langPortPairs getLanguageAtIdx:(int)row];
 }
@@ -1612,17 +1535,17 @@ struct AudioFormat {
 }
 
 -(void)onBurstModeFinished {
-    //NSLog(@"onBurstModeFinished()");
-    NSLog(@"---Burst Mode Finished---");
+    ////NSLog(@"onBurstModeFinished()");
+    //NSLog(@"---Burst Mode Finished---");
     isBurstMode = NO;
     
     // Send Missing Packets (if any)
     if ([payloadStorageList getMissingPayloads].count > 0) {
         NSArray *missingPayloads = [payloadStorageList getMissingPayloads];
         [self sendMissingPacketsRequestWithPort:audioDataPort AndMissingPayloads:missingPayloads];
-        NSLog(@"Sending **MISSING PACKETS REQUEST** with port:%d, and ALL missing payloads(%d): %@", audioDataPort, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
+        //NSLog(@"Sending **MISSING PACKETS REQUEST** with port:%d, and ALL missing payloads(%d): %@", audioDataPort, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
     } else {
-        NSLog(@"No Missing Packets to Send. Ok.");
+        //NSLog(@"No Missing Packets to Send. Ok.");
     }
 }
 
@@ -1701,13 +1624,13 @@ NSString* deviceName() {
         if (!isBurstMode) {
             NSArray *missingPayloads = [payloadStorageList getMissingPayloads];
             [self sendMissingPacketsRequestWithPort:audioDataPort AndMissingPayloads:missingPayloads];
-            NSLog(@"NOT in Burst Mode. Sending **MISSING PACKETS REQUEST** with port:%d, and ALL missing payloads(%d): %@", audioDataPort, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
+            //NSLog(@"NOT in Burst Mode. Sending **MISSING PACKETS REQUEST** with port:%d, and ALL missing payloads(%d): %@", audioDataPort, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
             
         } else {
-            NSLog(@"We're in BURST MODE. Not sending existing Missing Payloads.");
+            //NSLog(@"We're in BURST MODE. Not sending existing Missing Payloads.");
         }
     } else {
-        NSLog(@"There are 0 MissingPayloads.");
+        //NSLog(@"There are 0 MissingPayloads.");
     }
 }
 */

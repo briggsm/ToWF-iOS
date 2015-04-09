@@ -10,10 +10,10 @@
 
 #define TICK NSDate *startTime = [NSDate date]
 #define TOCK NSLog(@"%s Time: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
-#define TOCK1 NSLog(@"%s Time1: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
-#define TOCK2 NSLog(@"%s Time2: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
-#define TOCK3 NSLog(@"%s Time3: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
-#define TOCK4 NSLog(@"%s Time4: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
+//#define TOCK1 NSLog(@"%s Time1: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
+//#define TOCK2 NSLog(@"%s Time2: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
+//#define TOCK3 NSLog(@"%s Time3: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
+//#define TOCK4 NSLog(@"%s Time4: %fus", __func__, [startTime timeIntervalSinceNow] * -1000000.0)
 
 @interface Util : NSObject
 
