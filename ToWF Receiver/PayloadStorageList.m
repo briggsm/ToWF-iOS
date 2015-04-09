@@ -30,17 +30,9 @@
     }
     return self;
 }
-/*
--(void)addMissingPayload:(PcmAudioDataPayload*)payload {
-    if (![self hasMissingPayloadAnywhereWithThisSeqId:payload.seqId] && ![self hasFullPayloadAnywhereWithThisSeqId:payload.seqId]) {
-        [payloadStorageList addObject:payload];
-        [payloadStorageList sortUsingSelector:@selector(compare:)];
-    }
-}
-*/
-//-(void)addMissingPayloads:(NSArray*)missingPayloadList {
+
 -(void)addIncrementingMissingPayloads:(NSArray*)incrMissingPayloadsList {
-    // missingPayloadsList ought to have Incrementing seqId's
+    // missingPayloadsList ought to (must) have Incrementing seqId's
     
     if (incrMissingPayloadsList.count == 0) {
         return;

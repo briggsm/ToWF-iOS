@@ -10,16 +10,6 @@
 #import "Util.h"
 #import "SeqId.h"
 
-// Audio Data Payload Constants
-/*
-#define ADPL_HEADER_SEQ_ID_START 0
-#define ADPL_HEADER_SEQ_ID_LENGTH 2
-#define ADPL_HEADER_AUDIO_DATA_ALLOCATED_BYTES_START 2
-#define ADPL_HEADER_AUDIO_DATA_ALLOCATED_BYTES_LENGTH 2
-#define ADPL_HEADER_LENGTH ADPL_HEADER_SEQ_ID_LENGTH + ADPL_HEADER_AUDIO_DATA_ALLOCATED_BYTES_LENGTH
-#define ADPL_AUDIO_DATA_START ADPL_HEADER_LENGTH
-*/
-
 @interface PcmAudioDataPayload() {
 
 }
@@ -46,28 +36,16 @@
     return self;
 }
 
-/*
-- (id)initWithDgData:(NSData*)dgData {
-    if (self = [super init]) {
-        
-    }
-    return self;
-}
-*/
-
 // Need this for sortUsingDescriptors:
 - (NSComparisonResult)compare:(PcmAudioDataPayload*)otherPayload {
-    //if (self.seqId.intValue < otherPayload.seqId.intValue) {
     if ([self.seqId isLessThanSeqId:otherPayload.seqId]) {
         return NSOrderedAscending;
-    //} else if (self.seqId.intValue == otherPayload.seqId.intValue) {
     } else if ([self.seqId isEqualToSeqId:otherPayload.seqId]) {
         return NSOrderedSame;
     } else {
         return NSOrderedDescending;
     }
 }
-
 
 // Need this ("isEqual:" and "hash:") for checks for "containsObject:" calls
 - (BOOL)isEqual:(id)other {
@@ -85,7 +63,6 @@
     return [self.seqId hash];
 }
 
-
 -(Boolean)isEqualToPcmAudioDataPayload:(PcmAudioDataPayload*)otherPcmAudioDataPayload {
     // Just check that the SeqId's are equal. That's enough.
     if ([self.seqId isEqualToSeqId:otherPcmAudioDataPayload.seqId]) {
@@ -94,7 +71,5 @@
         return NO;
     }
 }
-
-
 
 @end

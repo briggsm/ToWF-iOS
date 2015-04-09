@@ -12,12 +12,8 @@
 @interface PayloadStorageList : NSObject
 
 - (id)init;
-//-(void)addPayload:(PcmAudioDataPayload*)payload;
-//-(void)addMissingPayload:(PcmAudioDataPayload*)payload;
-//-(void)addMissingPayloads:(NSArray*)missingPayloadList;
 -(void)addIncrementingMissingPayloads:(NSArray*)incrMissingPayloadsList;
 -(void)addFullPayload:(PcmAudioDataPayload*)payload;
-
 -(Boolean)hasMissingPayloadAtFirstElement;
 -(Boolean)hasMissingPayloadAtFirstElementWithThisSeqId:(SeqId*)seqId;
 -(Boolean)hasMissingPayloadAnywhereWithThisSeqId:(SeqId*)seqId;

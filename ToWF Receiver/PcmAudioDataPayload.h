@@ -15,11 +15,9 @@
 #define ADPL_HEADER_AUDIO_DATA_ALLOCATED_BYTES_LENGTH 2
 #define ADPL_HEADER_LENGTH (ADPL_HEADER_SEQ_ID_LENGTH + ADPL_HEADER_AUDIO_DATA_ALLOCATED_BYTES_LENGTH)
 #define ADPL_AUDIO_DATA_START ADPL_HEADER_LENGTH
-//#define ADPL_AUDIO_DATA_AVAILABLE_SIZE (UDP_PAYLOAD_SIZE - ADPL_HEADER_LENGTH)
 
 @interface PcmAudioDataPayload : NSObject
 
-//@property (nonatomic, assign) int seqId;
 @property (nonatomic, strong) SeqId *seqId;
 @property (nonatomic, assign) int audioDataAllocatedBytes;
 @property (nonatomic, strong) NSData *audioData;

@@ -24,15 +24,6 @@
 
 // Need this for sortUsingDescriptors:
 - (NSComparisonResult)compare:(SeqId*)otherSeqId {
-    /*
-    if (self.intValue < otherSeqId.intValue) {
-        return NSOrderedAscending;
-    } else if (self.intValue == otherSeqId.intValue) {
-        return NSOrderedSame;
-    } else {
-        return NSOrderedDescending;
-    }
-    */
     if ([self isLessThanSeqId:otherSeqId]) {
         return NSOrderedAscending;
     } else if ([self isEqualToSeqId:otherSeqId]) {
@@ -103,8 +94,6 @@
     }
 }
 
-
-//-(SeqId*)minus:(SeqId*)otherSeqId {
 -(int)numSeqIdsExclusivelyBetweenMeAndSeqId:(SeqId*)otherSeqId {
     if ([self isEqualToSeqId:otherSeqId]) {
         return 0;
@@ -124,6 +113,5 @@
         }
     }
 }
-
 
 @end
