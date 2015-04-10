@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6751" systemVersion="14C109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6751" systemVersion="14C1514" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6736"/>
@@ -24,13 +24,13 @@
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Wi-Fi: " lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dfU-KE-OVx">
                                         <rect key="frame" x="0.0" y="0.0" width="50" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="&lt;None&gt;" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gkP-sN-NgH">
                                         <rect key="frame" x="50" y="0.0" width="64" height="21"/>
                                         <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="17"/>
-                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
@@ -54,7 +54,7 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Waiting for Server to Stream..." lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yHJ-GU-MyQ">
                                 <rect key="frame" x="16" y="57" width="231" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6ju-sf-9Ai" userLabel="streamView">
@@ -63,7 +63,7 @@
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Language:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cXW-7w-lh6">
                                         <rect key="frame" x="0.0" y="11" width="81" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="DrB-pz-oai">
@@ -77,19 +77,19 @@
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Delay:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="e90-K5-7a2">
                                                 <rect key="frame" x="0.0" y="49" width="48" height="21"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1.0" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bSm-NP-CYg">
                                                 <rect key="frame" x="56" y="49" width="24" height="21"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="seconds" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EYb-5S-9WZ">
                                                 <rect key="frame" x="88" y="49" width="66" height="21"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="0.13" maxValue="2" translatesAutoresizingMaskIntoConstraints="NO" id="0rU-jl-DCk">
@@ -99,7 +99,7 @@
                                                 </connections>
                                             </slider>
                                             <webView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hy2-dK-anf">
-                                                <rect key="frame" x="0.0" y="108" width="568" height="391"/>
+                                                <rect key="frame" x="0.0" y="147" width="568" height="352"/>
                                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                                 <dataDetectorType key="dataDetectorTypes"/>
                                                 <connections>
@@ -118,6 +118,15 @@
                                                 <color key="textColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
+                                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vzb-UU-EJQ">
+                                                <rect key="frame" x="8" y="108" width="51" height="31"/>
+                                            </switch>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Recover Missing Packets" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nFT-cV-CFn">
+                                                <rect key="frame" x="65" y="113" width="503" height="21"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
                                         </subviews>
                                         <constraints>
                                             <constraint firstItem="bSm-NP-CYg" firstAttribute="baseline" secondItem="e90-K5-7a2" secondAttribute="baseline" id="0ap-0f-szG"/>
@@ -128,16 +137,27 @@
                                             <constraint firstItem="bSm-NP-CYg" firstAttribute="baseline" secondItem="EYb-5S-9WZ" secondAttribute="baseline" id="DB7-9z-LYX"/>
                                             <constraint firstAttribute="trailing" secondItem="Uav-yd-yOl" secondAttribute="trailing" id="Dhf-H9-hH7"/>
                                             <constraint firstItem="0rU-jl-DCk" firstAttribute="leading" secondItem="rCm-cl-Qad" secondAttribute="leading" id="HNj-ne-yAH"/>
+                                            <constraint firstItem="hy2-dK-anf" firstAttribute="top" secondItem="vzb-UU-EJQ" secondAttribute="bottom" constant="8" id="I35-uw-9ef"/>
+                                            <constraint firstItem="vzb-UU-EJQ" firstAttribute="top" secondItem="0rU-jl-DCk" secondAttribute="bottom" constant="8" id="JL6-3m-Rha"/>
                                             <constraint firstItem="Uav-yd-yOl" firstAttribute="top" secondItem="rCm-cl-Qad" secondAttribute="top" id="K8W-8B-nmn"/>
                                             <constraint firstItem="hy2-dK-anf" firstAttribute="top" secondItem="0rU-jl-DCk" secondAttribute="bottom" constant="8" id="P2d-5b-YNW"/>
                                             <constraint firstAttribute="bottom" secondItem="hy2-dK-anf" secondAttribute="bottom" constant="4" id="R5N-8t-eKP"/>
                                             <constraint firstItem="EYb-5S-9WZ" firstAttribute="leading" secondItem="bSm-NP-CYg" secondAttribute="trailing" constant="8" id="WhB-IO-zUf"/>
+                                            <constraint firstItem="nFT-cV-CFn" firstAttribute="leading" secondItem="vzb-UU-EJQ" secondAttribute="trailing" constant="8" id="aj3-nH-vOj"/>
                                             <constraint firstItem="0rU-jl-DCk" firstAttribute="top" secondItem="e90-K5-7a2" secondAttribute="bottom" constant="0.5" id="jdS-F3-OgW"/>
                                             <constraint firstItem="bSm-NP-CYg" firstAttribute="leading" secondItem="e90-K5-7a2" secondAttribute="trailing" constant="8" id="kwG-8i-KKF"/>
+                                            <constraint firstItem="vzb-UU-EJQ" firstAttribute="leading" secondItem="rCm-cl-Qad" secondAttribute="leading" constant="8" id="mpe-F3-LgT"/>
+                                            <constraint firstItem="nFT-cV-CFn" firstAttribute="top" secondItem="0rU-jl-DCk" secondAttribute="bottom" constant="13" id="nOX-gG-7mA"/>
+                                            <constraint firstAttribute="trailing" secondItem="nFT-cV-CFn" secondAttribute="trailing" id="otY-Hi-UlW"/>
                                             <constraint firstAttribute="trailing" secondItem="30l-z2-1vW" secondAttribute="trailing" id="sF3-Pa-TuV"/>
                                             <constraint firstItem="e90-K5-7a2" firstAttribute="top" secondItem="30l-z2-1vW" secondAttribute="bottom" constant="12.5" id="tkC-2l-UaH"/>
                                             <constraint firstItem="hy2-dK-anf" firstAttribute="leading" secondItem="rCm-cl-Qad" secondAttribute="leading" id="vC4-S2-nn6"/>
                                         </constraints>
+                                        <variation key="default">
+                                            <mask key="constraints">
+                                                <exclude reference="P2d-5b-YNW"/>
+                                            </mask>
+                                        </variation>
                                     </view>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1T7-Zm-ZMs">
                                         <rect key="frame" x="0.0" y="40" width="127" height="36"/>
@@ -191,6 +211,7 @@
                         <outlet property="lblPlaybackSpeed" destination="30l-z2-1vW" id="eB8-Ui-WfS"/>
                         <outlet property="lblReceivingAudio" destination="Uav-yd-yOl" id="jnh-jq-7m8"/>
                         <outlet property="listeningView" destination="rCm-cl-Qad" id="itx-0E-Ae7"/>
+                        <outlet property="sendMissingPacketsRequestsSwitch" destination="vzb-UU-EJQ" id="WPi-2P-hne"/>
                         <outlet property="streamView" destination="6ju-sf-9Ai" id="Csk-O7-WL2"/>
                         <outlet property="waitingForServerLabel" destination="yHJ-GU-MyQ" id="MnE-wA-GDr"/>
                         <outlet property="webView" destination="hy2-dK-anf" id="4Gj-hy-fQv"/>
