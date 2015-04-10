@@ -742,7 +742,7 @@ struct AudioFormat {
                             
                             [self checkForReadyToQueuePacketsInStorageList];  // This function also queues them up for playing if they exist.
                             
-                            if ([payloadStorageList getSize] == 0) {
+                            if ([payloadStorageList getTotalNumPayloads] == 0) {
                                 isWaitingOnMissingPackets = NO;
                                 //NSLog(@"NOT WAITING on Missing Packet(s) anymore!");
                             } else {
@@ -803,7 +803,7 @@ struct AudioFormat {
                     }
                 } else {
                     // sendMissingPacketsRequestsSwitch is OFF
-                    //  so just send packets to play queue as they arrive. Only exception is if only 1 or 2 packets are skipped, queue the received packet and repeat 1 or 2 times 'cuz it's "pretty likely" they were truly lost & not just out of order.
+                    //  so just send packets to play queue as they arrive. Only exception is if only 1-3 packets are skipped, queue the received packet and repeat 1-3 times 'cuz it's "pretty likely" they were truly lost & not just out of order.
                     
                     // Check if this is a <Regular> or <Missing> packet. We only want to care about <Regular> packets.
                     if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_REGULAR) {
@@ -816,7 +816,7 @@ struct AudioFormat {
                         //   the audio will still "skip" but it did that before, so nothing really lost in audio quality
                         if ([currSeqId isGreaterThanSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
                             numSkippedPackets = [currSeqId numSeqIdsExclusivelyBetweenMeAndSeqId:lastQueuedSeqId];
-                            if (numSkippedPackets <= 2) {
+                            if (numSkippedPackets <= 3) {
                                 for (int i = 0; i < numSkippedPackets; i++) {
                                     [self queueThisPayload:pcmAudioDataPayload];  // Again
                                 }
@@ -838,7 +838,9 @@ struct AudioFormat {
 
 -(void)checkForReadyToQueuePacketsInStorageList {
     //NSLog(@" checking for ready-to-quque packets in StorageList");
-    while ([payloadStorageList hasFullPayloadAtFirstElementWithThisSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
+    
+    //while ([payloadStorageList hasFullPayloadAtFirstElementWithThisSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
+    while ([payloadStorageList hasFullPayloadAtFirstElement]) {
         //NSLog(@"  Great! We've got a packet (0x%04x) in the StorageList that we can queue up now. Queueing it & Removing from the StorageList.", lastQueuedSeqId.intValue + 1);
         [self queueThisPayload:[payloadStorageList popFirstPayload]];
     }
@@ -880,6 +882,10 @@ struct AudioFormat {
 
 -(float) getNumAudioSecondsFromNumAudioBytes:(uint32_t)numBytes {
     return numBytes / af.sampleRate / afSampleSizeInBytes / af.channels;
+}
+
+-(uint32_t) getNumAudioBytesFromNumAudioSeconds:(float)audioSeconds {
+    return (uint32_t)(audioSeconds * af.sampleRate * afSampleSizeInBytes * af.channels);
 }
 
 -(void) createAndStartNewAudioControllerAndSetup {
@@ -1075,11 +1081,50 @@ struct AudioFormat {
     //NSLog(@"---Burst Mode Finished---");
     isBurstMode = NO;
     
-    // Send Missing Packets (if any)
+    // Send Missing Packets (if any), though we must limit our request so that total paylostStorageList size (in secs) doesn't exceed "desiredDelay".
+    //      If payloadStorageList is too big, we must cut it down to size here, then request whatever missingPayloads are left.
     if ([payloadStorageList getMissingPayloads].count > 0) {
+        
+        float payloadStorageListSizeSecs = [self getNumAudioSecondsFromNumAudioBytes:[payloadStorageList getTotalNumPayloads]*audioDataMaxValidSize];
+        
+        //NSLog(@"============================");
+        //NSLog(@"payloadStorageList.totalNumPayloads: %d", [payloadStorageList getTotalNumPayloads]);
+        //NSLog(@"payloadStorageList.numMissingPayloads: %d", [payloadStorageList getNumMissingPayloads]);
+        //NSLog(@"payloadStorageList1: %@", [payloadStorageList getAllPayloadsSeqIdsAsHexString]);
+        //NSLog(@"audioDataMaxValidSize: %d", audioDataMaxValidSize);
+        //NSLog(@"payloadStorageListSizeSecs: %f", payloadStorageListSizeSecs);
+        //NSLog(@"self.desiredDelaySlider.value: %f", self.desiredDelaySlider.value);
+        
+        if (payloadStorageListSizeSecs > self.desiredDelaySlider.value) {
+            float numSecsToCut = payloadStorageListSizeSecs - self.desiredDelaySlider.value;
+            //NSLog(@"numSecsToCut: %f", numSecsToCut);
+            uint32_t numBytesToCut = [self getNumAudioBytesFromNumAudioSeconds:numSecsToCut];
+            //NSLog(@"numBytesToCut: %d", numBytesToCut);
+            uint32_t numPayloadsToCut = numBytesToCut / audioDataMaxValidSize;
+            //NSLog(@"numPayloadsToCut: %d", numPayloadsToCut);
+            if (numPayloadsToCut > 0) {
+                //NSLog(@"payloadStorageList.totalNumPayloads(Before): %d", [payloadStorageList getTotalNumPayloads]);
+                //NSLog(@"payloadStorageList.numMissingPayloads(Before): %d", (int)[payloadStorageList getMissingPayloads].count);
+                
+                [payloadStorageList removeMissingPayloadsInFirstXPayloads:numPayloadsToCut];  // Leave any full payloads 'cuz we already got them and we'll instantly queue them up anyhow with our coming up call to checkForReadyToQueuePacketsInStorageList.
+                
+                //NSLog(@"payloadStorageList.totalNumPayloads(After): %d", [payloadStorageList getTotalNumPayloads]);
+                //NSLog(@"payloadStorageList.numMissingPayloads(After): %d", (int)[payloadStorageList getMissingPayloads].count);
+                //NSLog(@"payloadStorageList2: %@", [payloadStorageList getAllPayloadsSeqIdsAsHexString]);
+                
+                [self checkForReadyToQueuePacketsInStorageList];
+                
+                //NSLog(@"payloadStorageList.totalNumPayloads(After check for Ready-to-Queue): %d", [payloadStorageList getTotalNumPayloads]);
+                //NSLog(@"payloadStorageList3: %@", [payloadStorageList getAllPayloadsSeqIdsAsHexString]);
+            }
+        }
+        
         NSArray *missingPayloads = [payloadStorageList getMissingPayloads];
         [self sendMissingPacketsRequestWithPort:audioDataPort AndMissingPayloads:missingPayloads];
         //NSLog(@"Sending **MISSING PACKETS REQUEST** with port:%d, and ALL missing payloads(%d): %@", audioDataPort, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
+        
+        
+        
     } else {
         //NSLog(@"No Missing Packets to Send. Ok.");
     }

@@ -188,9 +188,43 @@
     return s;
 }
 
--(int)getSize {
+-(NSString*)getAllPayloadsSeqIdsAsHexString {
+    NSMutableString *s = [[NSMutableString alloc] init];
+    for (int i = 0; i < payloadStorageList.count; i++) {
+        [s appendString:[NSString stringWithFormat:@"0x%04x", ((PcmAudioDataPayload*)payloadStorageList[i]).seqId.intValue]];
+        if ( ((PcmAudioDataPayload*)payloadStorageList[i]).audioData == nil ) {
+            [s appendString:@"{M}, "];
+        } else {
+            [s appendString:@"{F}, "];
+        }
+    }
+    return s;
+}
+
+-(int)getTotalNumPayloads {
     return (int)payloadStorageList.count;
 }
+
+-(int)getNumMissingPayloads {
+    int num = 0;
+    for (int i = 0; i < payloadStorageList.count; i++) {
+        if ( ((PcmAudioDataPayload*)payloadStorageList[i]).audioData == nil ) {
+            num++;
+        }
+    }
+    return num;
+}
+
+-(int)getNumFullPayloads {
+    int num = 0;
+    for (int i = 0; i < payloadStorageList.count; i++) {
+        if ( ((PcmAudioDataPayload*)payloadStorageList[i]).audioData != nil ) {
+            num++;
+        }
+    }
+    return num;
+}
+
 
 -(NSArray*)getMissingPayloads {
     NSMutableArray *missingPayloads = [[NSMutableArray alloc] init];
@@ -200,6 +234,19 @@
         }
     }
     return missingPayloads;
+}
+
+-(void)removeMissingPayloadsInFirstXPayloads:(int)numPayloadsToRemove {
+    // First iterate through list to find index's of the ones which need to be removed
+    NSMutableArray *payloadsToRemove = [NSMutableArray array];
+    for (int i = 0; i < numPayloadsToRemove; i++) {
+        if ( ((PcmAudioDataPayload*)payloadStorageList[i]).audioData == nil ) {
+            [payloadsToRemove addObject:payloadStorageList[i]];
+        }
+    }
+    
+    // Now remove them
+    [payloadStorageList removeObjectsInArray:payloadsToRemove];
 }
 
 @end
