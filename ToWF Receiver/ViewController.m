@@ -203,6 +203,7 @@ struct AudioFormat {
 @property (weak, nonatomic) IBOutlet UISlider *desiredDelaySlider;
 @property (weak, nonatomic) IBOutlet UILabel *desiredDelayLabel;
 @property (weak, nonatomic) IBOutlet UISwitch *sendMissingPacketsRequestsSwitch;
+@property (weak, nonatomic) IBOutlet UITextField *chatMsgTF;
 @property (nonatomic, strong) AEAudioController *audioController;
 @property (nonatomic, strong) DatagramChannel *dgChannel;
 @property (nonatomic, strong) AEAudioUnitFilter *timePitchFastFilter;
@@ -329,6 +330,12 @@ struct AudioFormat {
     {
         [self onStartListening];
     }
+}
+
+- (IBAction)onSendChatMsgClicked:(id)sender {
+    //[self.chatMsgTF resignFirstResponder];
+    //[self sendChatMsg];
+    [self processChatMsg];
 }
 
 - (void)onStopListening {
@@ -1198,6 +1205,33 @@ NSString* deviceName() {
     }
     
     return s;
+}
+
+-(void) processChatMsg {
+    [self.chatMsgTF resignFirstResponder];
+    
+    NSString *msg = self.chatMsgTF.text;
+
+    
+    if (![msg isEqualToString:@""]) {
+        self.chatMsgTF.text = @"";  // Clear text field
+        [self logMessage:[NSString stringWithFormat:@"Me: %@", msg]];  // Show msg in the web-view
+        [self sendChatMsg:msg]; // Send msg to Server
+    }
+}
+
+-(void) sendChatMsg:(NSString*)msg {
+    NSLog(@"Sending Chat Msg: %@", msg);
+}
+
+-(BOOL)textFieldShouldReturn:(UITextField *)textField {
+    if (textField == self.chatMsgTF) {
+        //[textField resignFirstResponder];
+        [self processChatMsg];
+        return NO;
+    }
+    
+    return NO;
 }
 
 @end

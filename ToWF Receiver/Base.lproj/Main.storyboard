@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6751" systemVersion="14C1514" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7531" systemVersion="14D131" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6736"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7520"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -99,7 +99,7 @@
                                                 </connections>
                                             </slider>
                                             <webView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hy2-dK-anf">
-                                                <rect key="frame" x="0.0" y="147" width="568" height="352"/>
+                                                <rect key="frame" x="0.0" y="196" width="568" height="303"/>
                                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                                 <dataDetectorType key="dataDetectorTypes"/>
                                                 <connections>
@@ -127,6 +127,23 @@
                                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
+                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Send Message to Server Admin" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="2af-Wt-8jV">
+                                                <rect key="frame" x="0.0" y="152" width="524" height="30"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits" returnKeyType="send"/>
+                                                <connections>
+                                                    <outlet property="delegate" destination="BYZ-38-t0r" id="aUU-R2-Lmh"/>
+                                                </connections>
+                                            </textField>
+                                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dR9-lV-zSQ">
+                                                <rect key="frame" x="532" y="151" width="36" height="30"/>
+                                                <state key="normal" title="Send">
+                                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                </state>
+                                                <connections>
+                                                    <action selector="onSendChatMsgClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="dPL-zZ-75Y"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
                                         <constraints>
                                             <constraint firstItem="bSm-NP-CYg" firstAttribute="baseline" secondItem="e90-K5-7a2" secondAttribute="baseline" id="0ap-0f-szG"/>
@@ -137,18 +154,23 @@
                                             <constraint firstItem="bSm-NP-CYg" firstAttribute="baseline" secondItem="EYb-5S-9WZ" secondAttribute="baseline" id="DB7-9z-LYX"/>
                                             <constraint firstAttribute="trailing" secondItem="Uav-yd-yOl" secondAttribute="trailing" id="Dhf-H9-hH7"/>
                                             <constraint firstItem="0rU-jl-DCk" firstAttribute="leading" secondItem="rCm-cl-Qad" secondAttribute="leading" id="HNj-ne-yAH"/>
-                                            <constraint firstItem="hy2-dK-anf" firstAttribute="top" secondItem="vzb-UU-EJQ" secondAttribute="bottom" constant="8" id="I35-uw-9ef"/>
                                             <constraint firstItem="vzb-UU-EJQ" firstAttribute="top" secondItem="0rU-jl-DCk" secondAttribute="bottom" constant="8" id="JL6-3m-Rha"/>
+                                            <constraint firstItem="2af-Wt-8jV" firstAttribute="leading" secondItem="rCm-cl-Qad" secondAttribute="leading" id="JeD-wX-IrY"/>
                                             <constraint firstItem="Uav-yd-yOl" firstAttribute="top" secondItem="rCm-cl-Qad" secondAttribute="top" id="K8W-8B-nmn"/>
+                                            <constraint firstItem="hy2-dK-anf" firstAttribute="top" secondItem="2af-Wt-8jV" secondAttribute="bottom" constant="14" id="Mwu-qz-F32"/>
                                             <constraint firstItem="hy2-dK-anf" firstAttribute="top" secondItem="0rU-jl-DCk" secondAttribute="bottom" constant="8" id="P2d-5b-YNW"/>
                                             <constraint firstAttribute="bottom" secondItem="hy2-dK-anf" secondAttribute="bottom" constant="4" id="R5N-8t-eKP"/>
+                                            <constraint firstAttribute="trailing" secondItem="dR9-lV-zSQ" secondAttribute="trailing" id="SrI-3b-RwU"/>
                                             <constraint firstItem="EYb-5S-9WZ" firstAttribute="leading" secondItem="bSm-NP-CYg" secondAttribute="trailing" constant="8" id="WhB-IO-zUf"/>
                                             <constraint firstItem="nFT-cV-CFn" firstAttribute="leading" secondItem="vzb-UU-EJQ" secondAttribute="trailing" constant="8" id="aj3-nH-vOj"/>
+                                            <constraint firstItem="dR9-lV-zSQ" firstAttribute="leading" secondItem="2af-Wt-8jV" secondAttribute="trailing" constant="8" id="alU-rx-fgZ"/>
+                                            <constraint firstItem="dR9-lV-zSQ" firstAttribute="top" secondItem="vzb-UU-EJQ" secondAttribute="bottom" constant="12" id="bec-Kd-muk"/>
                                             <constraint firstItem="0rU-jl-DCk" firstAttribute="top" secondItem="e90-K5-7a2" secondAttribute="bottom" constant="0.5" id="jdS-F3-OgW"/>
                                             <constraint firstItem="bSm-NP-CYg" firstAttribute="leading" secondItem="e90-K5-7a2" secondAttribute="trailing" constant="8" id="kwG-8i-KKF"/>
                                             <constraint firstItem="vzb-UU-EJQ" firstAttribute="leading" secondItem="rCm-cl-Qad" secondAttribute="leading" constant="8" id="mpe-F3-LgT"/>
                                             <constraint firstItem="nFT-cV-CFn" firstAttribute="top" secondItem="0rU-jl-DCk" secondAttribute="bottom" constant="13" id="nOX-gG-7mA"/>
                                             <constraint firstAttribute="trailing" secondItem="nFT-cV-CFn" secondAttribute="trailing" id="otY-Hi-UlW"/>
+                                            <constraint firstItem="2af-Wt-8jV" firstAttribute="top" secondItem="vzb-UU-EJQ" secondAttribute="bottom" constant="13" id="r9d-bX-PY9"/>
                                             <constraint firstAttribute="trailing" secondItem="30l-z2-1vW" secondAttribute="trailing" id="sF3-Pa-TuV"/>
                                             <constraint firstItem="e90-K5-7a2" firstAttribute="top" secondItem="30l-z2-1vW" secondAttribute="bottom" constant="12.5" id="tkC-2l-UaH"/>
                                             <constraint firstItem="hy2-dK-anf" firstAttribute="leading" secondItem="rCm-cl-Qad" secondAttribute="leading" id="vC4-S2-nn6"/>
@@ -205,6 +227,7 @@
                     </view>
                     <connections>
                         <outlet property="btnStartStop" destination="1T7-Zm-ZMs" id="OU7-am-mb7"/>
+                        <outlet property="chatMsgTF" destination="2af-Wt-8jV" id="l7s-Zk-iQx"/>
                         <outlet property="desiredDelayLabel" destination="bSm-NP-CYg" id="StE-Yq-bCW"/>
                         <outlet property="desiredDelaySlider" destination="0rU-jl-DCk" id="hrn-yM-a36"/>
                         <outlet property="languageTF" destination="DrB-pz-oai" id="6f2-qO-0o7"/>
