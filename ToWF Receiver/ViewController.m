@@ -50,6 +50,7 @@
 #define DG_DATA_HEADER_PAYLOAD_TYPE_MISSING_PACKETS_REQUEST 4
 #define DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING 5
 #define DG_DATA_HEADER_PAYLOAD_TYPE_ENABLE_MPRS 6
+#define DG_DATA_HEADER_PAYLOAD_TYPE_CHAT_MSG 7
 
 
 // OS Constants
@@ -112,6 +113,9 @@
 // Enable MPRs (Missing Packet Requests)
 #define ENMPRS_ENABLED_START (DG_DATA_HEADER_LENGTH + 0)
 #define ENMPRS_ENABLED_LENGTH 1
+
+// Chat Msg
+#define CHATMSG_MSG_START (DG_DATA_HEADER_LENGTH + 0)
 
 
 #define SERVER_STREAMING_WATCHDOG_TIMER_TIMEOUT 7.0  // If we don't receive any packets from the server in this many seconds, we consider the server NOT STREAMING.
@@ -501,6 +505,21 @@ struct AudioFormat {
     }
 }
 
+-(void)sendChatMsgToServer:(NSString*)msg {
+    NSMutableData *cmData = [[NSMutableData alloc] init];
+    
+    // "ToWF" Header
+    [Util appendInt:0x546F5746 OfLength:4 ToData:cmData BigEndian:YES]; // "ToWF"
+    [Util appendInt:0 OfLength:1 ToData:cmData BigEndian:NO];  // Rsvd
+    [Util appendInt:DG_DATA_HEADER_PAYLOAD_TYPE_CHAT_MSG OfLength:1 ToData:cmData BigEndian:NO];  // Payload Type
+    
+    // Message
+    [Util appendNullTermString:msg ToData:cmData MaxLength:UDP_PAYLOAD_SIZE];
+    
+    // Now, send the packet to the Server
+    [infoSocket sendData:cmData toHost:serverHostIp port:INFO_PORT_NUMBER withTimeout:-1 tag:0];
+}
+
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     NSLog(@"webView:didFailLoadWithError: %@", error);
 }
@@ -633,6 +652,12 @@ struct AudioFormat {
                 self.sendMissingPacketsRequestsSwitch.on = NO;
             }
             self.sendMissingPacketsRequestsSwitch.enabled = isEnabled;
+        } else if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_CHAT_MSG) {
+            NSString *msg = [Util getNullTermStringFromData:dgData AtOffset:CHATMSG_MSG_START WithMaxLength:UDP_PAYLOAD_SIZE];
+            [self logMessage:[NSString stringWithFormat:@"Server: %@", msg]];
+
+            // To-Do: Beep
+            
         }
     } else {  // Not the INFO PORT NUMBER (7769), so must be an audio streaming port (7770, 7771, etc)
         
@@ -1228,12 +1253,8 @@ NSString* deviceName() {
     if (![msg isEqualToString:@""]) {
         self.chatMsgTF.text = @"";  // Clear text field
         [self logMessage:[NSString stringWithFormat:@"Me: %@", msg]];  // Show msg in the web-view
-        [self sendChatMsg:msg]; // Send msg to Server
+        [self sendChatMsgToServer:msg]; // Send msg to Server
     }
-}
-
--(void) sendChatMsg:(NSString*)msg {
-    NSLog(@"Sending Chat Msg: %@", msg);
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField *)textField {

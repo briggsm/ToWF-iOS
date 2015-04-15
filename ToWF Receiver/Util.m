@@ -80,7 +80,9 @@
 }
 
 +(NSString*) getNullTermStringFromData:(NSData*)data AtOffset:(uint32_t)offset WithMaxLength:(uint32_t)maxLength {
-    NSData *strData = [data subdataWithRange:NSMakeRange(offset, maxLength)];
+    int length = MIN((int)(data.length - offset), maxLength);
+    //NSData *strData = [data subdataWithRange:NSMakeRange(offset, maxLength)];
+    NSData *strData = [data subdataWithRange:NSMakeRange(offset, length)];
     int i;
     for (i = 0; i < strData.length; i++) {
         uint8_t ba[1];
