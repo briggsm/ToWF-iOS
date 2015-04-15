@@ -49,6 +49,7 @@
 #define DG_DATA_HEADER_PAYLOAD_TYPE_CLIENT_LISTENING 3
 #define DG_DATA_HEADER_PAYLOAD_TYPE_MISSING_PACKETS_REQUEST 4
 #define DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING 5
+#define DG_DATA_HEADER_PAYLOAD_TYPE_ENABLE_MPRS 6
 
 
 // OS Constants
@@ -107,6 +108,11 @@
 #define MPRPL_PACKET0_SEQID_START (DG_DATA_HEADER_LENGTH + 4)
 #define MPRPL_PACKET0_SEQID_LENGTH 2
 #define MPRPL_PACKETS_AVAILABLE_SIZE (UDP_DATA_SIZE - DG_DATA_HEADER_LENGTH - MPRPL_NUM_MISSING_PACKETS_LENGTH - MPRPL_RSVD0_LENGTH - MPRPL_PORT_LENGTH)
+
+// Enable MPRs (Missing Packet Requests)
+#define ENMPRS_ENABLED_START (DG_DATA_HEADER_LENGTH + 0)
+#define ENMPRS_ENABLED_LENGTH 1
+
 
 #define SERVER_STREAMING_WATCHDOG_TIMER_TIMEOUT 7.0  // If we don't receive any packets from the server in this many seconds, we consider the server NOT STREAMING.
 
@@ -621,6 +627,12 @@ struct AudioFormat {
             }
             
             [langPicker reloadAllComponents];  // So it doesn't read from it's cache (which might be outdated).
+        } else if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_ENABLE_MPRS) {
+            Boolean isEnabled = ([Util getUInt8FromData:dgData AtOffset:ENMPRS_ENABLED_START] == 1);
+            if (!isEnabled) {
+                self.sendMissingPacketsRequestsSwitch.on = NO;
+            }
+            self.sendMissingPacketsRequestsSwitch.enabled = isEnabled;
         }
     } else {  // Not the INFO PORT NUMBER (7769), so must be an audio streaming port (7770, 7771, etc)
         
