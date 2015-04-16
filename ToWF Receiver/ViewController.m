@@ -118,7 +118,8 @@
 #define CHATMSG_MSG_START (DG_DATA_HEADER_LENGTH + 0)
 
 
-#define SERVER_STREAMING_WATCHDOG_TIMER_TIMEOUT 7.0  // If we don't receive any packets from the server in this many seconds, we consider the server NOT STREAMING.
+#define SERVER_STREAMING_CHECK_TIMER_INTERVAL 4.0  // Check if at least 1 audio data packet has been received in the last X seconds.
+#define RECEIVING_AUDIO_CHECK_TIMER_INTERVAL 0.2  // 0.2 => 5 fps "refresh rate"
 
 #define FAST_PLAYBACK_SPEED 1.2
 #define SLOW_PLAYBACK_SPEED 0.8
@@ -177,9 +178,11 @@ struct AudioFormat {
     UIPickerView *langPicker;
     
     BOOL isServerStreaming;
-    NSTimer *serverStreamingWatchdogTimer;
+    BOOL receivedAPacket;
+    NSTimer *serverStreamingCheckTimer;
     BOOL isReceivingAudio;
-    NSTimer *receivingAudioWatchdogTimer;
+    BOOL receivedAnAudioPacket;
+    NSTimer *receivingAudioCheckTimer;
     
     BOOL isReloadingCircularBuffer;
     
@@ -317,6 +320,12 @@ struct AudioFormat {
     isWaitingOnMissingPackets = NO;
     isBurstMode = NO;
     
+    serverStreamingCheckTimer = [NSTimer scheduledTimerWithTimeInterval:SERVER_STREAMING_CHECK_TIMER_INTERVAL target:self selector:@selector(checkServerStoppedStreaming) userInfo:nil repeats:YES];
+    receivingAudioCheckTimer = [NSTimer scheduledTimerWithTimeInterval:RECEIVING_AUDIO_CHECK_TIMER_INTERVAL target:self selector:@selector(checkReceivingAudio) userInfo:nil repeats:YES];
+    
+    isServerStreaming = NO;
+    isReceivingAudio = NO;
+    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -451,16 +460,16 @@ struct AudioFormat {
     
     // OS Version
     NSString *osVer = [[UIDevice currentDevice] systemVersion];
-    [Util appendNullTermString:osVer ToData:clData MaxLength:CLPL_OS_VERSION_STR_LENGTH];
+    [Util appendNullTermString:osVer ToData:clData MaxLength:CLPL_OS_VERSION_STR_LENGTH PadWith0s:YES];
     
     // HW Manufacturer
-    [Util appendNullTermString:@"Apple" ToData:clData MaxLength:CLPL_HW_MANUFACTURER_STR_LENGTH];
+    [Util appendNullTermString:@"Apple" ToData:clData MaxLength:CLPL_HW_MANUFACTURER_STR_LENGTH PadWith0s:YES];
     
     // HW Model
-    [Util appendNullTermString:deviceName() ToData:clData MaxLength:CLPL_HW_MODEL_STR_LENGTH];
+    [Util appendNullTermString:deviceName() ToData:clData MaxLength:CLPL_HW_MODEL_STR_LENGTH PadWith0s:YES];
     
     // Users Name / Device Name
-    [Util appendNullTermString:[[UIDevice currentDevice] name] ToData:clData MaxLength:CLPL_USERS_NAME_LENGTH];
+    [Util appendNullTermString:[[UIDevice currentDevice] name] ToData:clData MaxLength:CLPL_USERS_NAME_LENGTH PadWith0s:YES];
     
     // Now, send the CL packet to server
     [infoSocket sendData:clData toHost:serverHostIp port:INFO_PORT_NUMBER withTimeout:-1 tag:0];
@@ -514,7 +523,7 @@ struct AudioFormat {
     [Util appendInt:DG_DATA_HEADER_PAYLOAD_TYPE_CHAT_MSG OfLength:1 ToData:cmData BigEndian:NO];  // Payload Type
     
     // Message
-    [Util appendNullTermString:msg ToData:cmData MaxLength:UDP_PAYLOAD_SIZE];
+    [Util appendNullTermString:msg ToData:cmData MaxLength:UDP_PAYLOAD_SIZE PadWith0s:NO];
     
     // Now, send the packet to the Server
     [infoSocket sendData:cmData toHost:serverHostIp port:INFO_PORT_NUMBER withTimeout:-1 tag:0];
@@ -593,6 +602,13 @@ struct AudioFormat {
         return;
     }
     
+    receivedAPacket = YES;
+    if (!isServerStreaming) {
+        isServerStreaming = YES;
+        self.waitingForServerLabel.hidden = YES;  // Hide the "Waiting for Server to Stream" label
+        self.streamView.hidden = NO;  // Show the streamView (lang selection, "start listening" button, etc)
+    }
+    
     
     NSString *udpDataHost = nil;
     uint16_t udpDataPort = 0;
@@ -616,16 +632,6 @@ struct AudioFormat {
     
     if (udpDataPort == INFO_PORT_NUMBER) {
         //NSLog(@"udpDataPort == INFO_PORT_NUMBER");
-        isServerStreaming = YES;
-        self.waitingForServerLabel.hidden = YES;  // Hide the "Waiting for Server to Stream" label
-        self.streamView.hidden = NO;  // Show the streamView (lang selection, "start listening" button, etc)
-        
-        // Set watchdog timer - if it fires, then hide streamView & show "waiting for server" message.
-        if (serverStreamingWatchdogTimer != nil) {
-            [serverStreamingWatchdogTimer invalidate];
-            serverStreamingWatchdogTimer = nil;
-        }
-        serverStreamingWatchdogTimer = [NSTimer scheduledTimerWithTimeInterval:SERVER_STREAMING_WATCHDOG_TIMER_TIMEOUT target:self selector:@selector(onServerStoppedStreaming) userInfo:nil repeats:NO];
         
         if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_FORMAT) {
             // Audio Format packet
@@ -718,16 +724,8 @@ struct AudioFormat {
         
         numReceivedAudioDataPackets++;
         
-        if (!isReceivingAudio) {
-            NSLog(@"Receiving audio again");
-            [self.lblReceivingAudio setTextColor:colorGreen];
-        }
-        isReceivingAudio = YES;
-        if (receivingAudioWatchdogTimer != nil) {
-            [receivingAudioWatchdogTimer invalidate];
-            receivingAudioWatchdogTimer = nil;
-        }
-        receivingAudioWatchdogTimer = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(onCurrentlyNotReceivingAudio) userInfo:nil repeats:NO];  // 0.1 => 10 fps "refresh rate" // 0.2 => 5 fps "refresh rate"
+        receivedAnAudioPacket = YES;
+        
         
         if (isAudioFormatValid) {
             
@@ -1103,22 +1101,37 @@ struct AudioFormat {
     [self.wifiConnection setText:ssidInfo[@"SSID"]];
 }
 
--(void)onServerStoppedStreaming {
-    NSLog(@"onServerSToppedStreaming");
-
-    isServerStreaming = NO;
-    self.waitingForServerLabel.hidden = NO;  // Show the "Waiting for Server to Stream" label
-    self.streamView.hidden = YES;  // Hide the streamView (lang selection, "start listening" button, etc)
-    
-    // We better "click" Stop Listening too, in case user was listening at the time.
-    [self onStopListening];
+-(void)checkServerStoppedStreaming {
+    //NSLog(@"checkServerStoppedStreaming");
+    if (!receivedAPacket) {
+        if (isServerStreaming) {
+            isServerStreaming = NO;
+            self.waitingForServerLabel.hidden = NO;  // Show the "Waiting for Server to Stream" label
+            self.streamView.hidden = YES;  // Hide the streamView (lang selection, "start listening" button, etc)
+        
+            // We better "click" Stop Listening too, in case user was listening at the time.
+            [self onStopListening];
+        }
+    }
+    receivedAPacket = NO;
 }
 
--(void)onCurrentlyNotReceivingAudio {
-    NSLog(@"onCurrentlyNotReceivingAudio");
-    
-    isReceivingAudio = NO;
-    [self.lblReceivingAudio setTextColor:colorVeryLightGray];
+-(void)checkReceivingAudio {
+    //NSLog(@"checkReceivingAudio");
+    if (!receivedAnAudioPacket) {
+        if (isReceivingAudio) {
+            isReceivingAudio = NO;
+            NSLog(@"Not receiving audio...");
+            [self.lblReceivingAudio setTextColor:colorVeryLightGray];
+        }
+    } else {
+        if (!isReceivingAudio) {
+            isReceivingAudio = YES;
+            NSLog(@"...Receiving audio again");
+            [self.lblReceivingAudio setTextColor:colorGreen];
+        }
+    }
+    receivedAnAudioPacket = NO;
 }
 
 -(void)onBurstModeFinished {

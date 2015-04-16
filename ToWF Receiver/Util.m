@@ -62,7 +62,7 @@
     [data appendBytes:b length:length];
 }
 
-+(void) appendNullTermString:(NSString*)str ToData:(NSMutableData*)data MaxLength:(int)maxLength {
++(void) appendNullTermString:(NSString*)str ToData:(NSMutableData*)data MaxLength:(int)maxLength PadWith0s:(BOOL)pad {
     int length = MIN((int)str.length, maxLength);
     int i;
     uint8_t b[maxLength];
@@ -76,7 +76,17 @@
     if (i < maxLength) {
         b[i] = 0x00;
         [self appendInt:b[i] OfLength:1 ToData:data BigEndian:NO];
+        i++;
     }
+    
+    // Fill rest with 0's if pad==YES
+    if (pad) {
+        for (int j = i; j < maxLength; j++) {
+            b[j] = 0x00;
+            [self appendInt:b[j] OfLength:1 ToData:data BigEndian:NO];
+        }
+    }
+    
 }
 
 +(NSString*) getNullTermStringFromData:(NSData*)data AtOffset:(uint32_t)offset WithMaxLength:(uint32_t)maxLength {
