@@ -64,7 +64,7 @@
 
 +(void) appendNullTermString:(NSString*)str ToData:(NSMutableData*)data MaxLength:(int)maxLength {
     int length = MIN((int)str.length, maxLength);
-    int i, j;
+    int i;
     uint8_t b[maxLength];
     
     for (i = 0; i < length; i++) {
@@ -72,10 +72,10 @@
         [self appendInt:b[i] OfLength:1 ToData:data BigEndian:NO];
     }
     
-    // Null-terminte it & fill rest with 0's, if there's room.
-    for (j = i; j < maxLength; j++) {
-        b[j] = 0x00;
-        [self appendInt:b[j] OfLength:1 ToData:data BigEndian:NO];
+    // Null-terminte it, if there's room.
+    if (i < maxLength) {
+        b[i] = 0x00;
+        [self appendInt:b[i] OfLength:1 ToData:data BigEndian:NO];
     }
 }
 

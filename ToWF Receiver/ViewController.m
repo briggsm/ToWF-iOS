@@ -345,7 +345,7 @@ struct AudioFormat {
 - (IBAction)onSendChatMsgClicked:(id)sender {
     //[self.chatMsgTF resignFirstResponder];
     //[self sendChatMsg];
-    [self processChatMsg];
+    [self processOutgoingChatMsg];
 }
 
 - (void)onStopListening {
@@ -1245,7 +1245,7 @@ NSString* deviceName() {
     return s;
 }
 
--(void) processChatMsg {
+-(void) processOutgoingChatMsg {
     [self.chatMsgTF resignFirstResponder];
     
     NSString *msg = self.chatMsgTF.text;
@@ -1261,7 +1261,7 @@ NSString* deviceName() {
 -(BOOL)textFieldShouldReturn:(UITextField *)textField {
     if (textField == self.chatMsgTF) {
         //[textField resignFirstResponder];
-        [self processChatMsg];
+        [self processOutgoingChatMsg];
         return NO;
     }
     
