@@ -734,7 +734,7 @@ struct AudioFormat {
             
             // Check if we need to reload or stop reloading the circBuffer
             int currCircBufferDataSize = [self.dgChannel getBufferDataSize];
-            float currCircBufferDataSizeSecs = [self getNumAudioSecondsFromNumAudioBytes:currCircBufferDataSize];
+            float currCircBufferDataSizeSecs = [self getNumAudioSecondsFromNumAudioBytes:currCircBufferDataSize / 2];  // /2 to get back to MONO
             if (currCircBufferDataSize == 0) {
                 if (!isReloadingCircularBuffer) {
                     // Pause/Stop audioController
