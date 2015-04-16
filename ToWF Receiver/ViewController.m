@@ -36,8 +36,8 @@
 // Audio Datagram Constants
 #define DG_DATA_HEADER_ID_START 0  // "ToWF"
 #define DG_DATA_HEADER_ID_LENGTH 4
-#define DG_DATA_HEADER_CHANNEL_START 4  // Rsvd
-#define DG_DATA_HEADER_CHANNEL_LENGTH 1 // Rsvd
+#define DG_DATA_HEADER_RSVD0_START 4
+#define DG_DATA_HEADER_RSVD0_LENGTH 1
 #define DG_DATA_HEADER_PAYLOAD_TYPE_START 5
 #define DG_DATA_HEADER_PAYLOAD_TYPE_LENGTH 1
 
@@ -586,6 +586,14 @@ struct AudioFormat {
     withFilterContext:(id)filterContext
 {
     
+    // Check for "ToWF" header
+    uint32_t dataHeaderInt = [Util getUInt32FromData:dgData AtOffset:DG_DATA_HEADER_ID_START BigEndian:YES];
+    if (dataHeaderInt != 0x546F5746) {  // "ToWF"
+        NSLog(@"Yikes! Receiving a packet from some other app! Ignoring it.");
+        return;
+    }
+    
+    
     NSString *udpDataHost = nil;
     uint16_t udpDataPort = 0;
     [GCDAsyncUdpSocket getHost:&udpDataHost port:&udpDataPort fromAddress:address];
@@ -603,6 +611,9 @@ struct AudioFormat {
         burstModeWatchdogTimer = [NSTimer scheduledTimerWithTimeInterval: burstWatchdogTimerTimeout target:self selector:@selector(onBurstModeFinished) userInfo:nil repeats:NO];
     }
     
+    // Get payloadType
+    uint8_t payloadType = [Util getUInt8FromData:dgData AtOffset:DG_DATA_HEADER_PAYLOAD_TYPE_START];
+    
     if (udpDataPort == INFO_PORT_NUMBER) {
         //NSLog(@"udpDataPort == INFO_PORT_NUMBER");
         isServerStreaming = YES;
@@ -616,11 +627,48 @@ struct AudioFormat {
         }
         serverStreamingWatchdogTimer = [NSTimer scheduledTimerWithTimeInterval:SERVER_STREAMING_WATCHDOG_TIMER_TIMEOUT target:self selector:@selector(onServerStoppedStreaming) userInfo:nil repeats:NO];
         
-        // Get payloadType
-        uint8_t payloadType = [Util getUInt8FromData:dgData AtOffset:DG_DATA_HEADER_PAYLOAD_TYPE_START];
-        
-        // Check for lang/port pair
-        if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_LANG_PORT_PAIRS) {
+        if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_FORMAT) {
+            // Audio Format packet
+            //NSLog(@"AUDIO FORMAT Packet");
+            
+            // Set afdg vars
+            uint32_t afdgSampleRate = [Util getUInt32FromData:dgData AtOffset:AFDG_SAMPLE_RATE_START BigEndian:NO];
+            uint8_t afdgSampleSizeInBits = [Util getUInt8FromData:dgData AtOffset:AFDG_SAMPLE_SIZE_IN_BITS_START];
+            uint8_t afdgChannels = [Util getUInt8FromData:dgData AtOffset:AFDG_CHANNELS_START];
+            BOOL afdgIsSigned = [Util getUInt8FromData:dgData AtOffset:AFDG_SIGNED_START] == 1 ? YES : NO;
+            BOOL afdgIsBigEndian = [Util getUInt8FromData:dgData AtOffset:AFDG_BIG_ENDIAN_START] == 1 ? YES : NO;
+            
+            // If different than before, update the current audio format to the new values
+            if (afdgSampleRate != (uint32_t)af.sampleRate || afdgSampleSizeInBits != af.sampleSizeInBits || afdgChannels != af.channels || afdgIsSigned != af.isSigned || afdgIsBigEndian != af.isBigEndian) {
+                // Update "af" Audio Format
+                af.sampleRate = afdgSampleRate;
+                af.sampleSizeInBits = afdgSampleSizeInBits;
+                af.channels = afdgChannels;
+                af.isSigned = afdgIsSigned;
+                af.isBigEndian = afdgIsBigEndian;
+                
+                NSLog(@"Audio Format changed! Updated to: ");
+                NSLog(@" Sample Rate: %d", (uint32_t)af.sampleRate);
+                NSLog(@" Sample Size (in bits): %d", af.sampleSizeInBits);
+                NSLog(@" Channels: %d", af.channels);
+                NSLog(@" isSigned: %@", af.isSigned ? @"YES" : @"NO");
+                NSLog(@" isBigEndian: %@", af.isBigEndian ? @"YES" : @"NO");
+                
+                isAudioFormatValid = YES;
+                // ??? Maybe later add a check to make sure this is REALLY valid ???
+                
+                [self logInfo:FORMAT(@"Received Audio Format: %d, %d, %d, %@, %@", (int)af.sampleRate, af.sampleSizeInBits, af.channels, af.isSigned ? @"signed" : @"unsigned", af.isBigEndian ? @"bigEndian" : @"littleEndian")];
+                
+                // Set Derived Audio Format vars also
+                afSampleSizeInBytes = af.sampleSizeInBits / 8; if (af.sampleSizeInBits % 8 != 0) { afSampleSizeInBytes++; }
+                afFrameSize = afSampleSizeInBytes * af.channels;
+                audioDataMaxValidSize = (ADPL_AUDIO_DATA_AVAILABLE_SIZE - (ADPL_AUDIO_DATA_AVAILABLE_SIZE % afFrameSize));
+                packetRateMS = (int)(1.0 / (af.sampleRate * afFrameSize / audioDataMaxValidSize) * 1000);
+                burstWatchdogTimerTimeout = ((packetRateMS / 1000.0) - 0.001);
+                
+                [self createAndStartNewAudioControllerAndSetup];
+            }
+        } else if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_LANG_PORT_PAIRS) {
             uint8_t numLangPortPairs = [Util getUInt8FromData:dgData AtOffset:LPP_NUM_PAIRS_START];
             
             if (numLangPortPairs != [langPortPairs getNumPairs]) {
@@ -663,207 +711,160 @@ struct AudioFormat {
         
         if (!isListening) return;
         
-        // Look at Header to find out if we have an Audio Format packet, or a regular audio data packet
-        uint8_t payloadType = [Util getUInt8FromData:dgData AtOffset:DG_DATA_HEADER_PAYLOAD_TYPE_START];
+        // Must be Audio Data packet
+        //NSLog(@"AUDIO DATA packet");
         
-        if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_FORMAT) {
+        audioDataPort = udpDataPort;
+        
+        numReceivedAudioDataPackets++;
+        
+        if (!isReceivingAudio) {
+            NSLog(@"Receiving audio again");
+            [self.lblReceivingAudio setTextColor:colorGreen];
+        }
+        isReceivingAudio = YES;
+        if (receivingAudioWatchdogTimer != nil) {
+            [receivingAudioWatchdogTimer invalidate];
+            receivingAudioWatchdogTimer = nil;
+        }
+        receivingAudioWatchdogTimer = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(onCurrentlyNotReceivingAudio) userInfo:nil repeats:NO];  // 0.1 => 10 fps "refresh rate" // 0.2 => 5 fps "refresh rate"
+        
+        if (isAudioFormatValid) {
             
-            // Audio Format packet
-            //NSLog(@"AUDIO FORMAT Packet");
+            int numSkippedPackets = 0;
+            PcmAudioDataPayload *pcmAudioDataPayload = [[PcmAudioDataPayload alloc] initWithPayload:[dgData subdataWithRange:NSMakeRange(DG_DATA_HEADER_LENGTH, dgData.length-DG_DATA_HEADER_LENGTH)]];
             
-            // Set afdg vars
-            uint32_t afdgSampleRate = [Util getUInt32FromData:dgData AtOffset:AFDG_SAMPLE_RATE_START BigEndian:NO];
-            uint8_t afdgSampleSizeInBits = [Util getUInt8FromData:dgData AtOffset:AFDG_SAMPLE_SIZE_IN_BITS_START];
-            uint8_t afdgChannels = [Util getUInt8FromData:dgData AtOffset:AFDG_CHANNELS_START];
-            BOOL afdgIsSigned = [Util getUInt8FromData:dgData AtOffset:AFDG_SIGNED_START] == 1 ? YES : NO;
-            BOOL afdgIsBigEndian = [Util getUInt8FromData:dgData AtOffset:AFDG_BIG_ENDIAN_START] == 1 ? YES : NO;
-            
-            // If different than before, update the current audio format to the new values
-            if (afdgSampleRate != (uint32_t)af.sampleRate || afdgSampleSizeInBits != af.sampleSizeInBits || afdgChannels != af.channels || afdgIsSigned != af.isSigned || afdgIsBigEndian != af.isBigEndian) {
-                // Update "af" Audio Format
-                af.sampleRate = afdgSampleRate;
-                af.sampleSizeInBits = afdgSampleSizeInBits;
-                af.channels = afdgChannels;
-                af.isSigned = afdgIsSigned;
-                af.isBigEndian = afdgIsBigEndian;
-                
-                NSLog(@"Audio Format changed! Updated to: ");
-                NSLog(@" Sample Rate: %d", (uint32_t)af.sampleRate);
-                NSLog(@" Sample Size (in bits): %d", af.sampleSizeInBits);
-                NSLog(@" Channels: %d", af.channels);
-                NSLog(@" isSigned: %@", af.isSigned ? @"YES" : @"NO");
-                NSLog(@" isBigEndian: %@", af.isBigEndian ? @"YES" : @"NO");
-                
-                isAudioFormatValid = YES;
-                // ??? Maybe later add a check to make sure this is REALLY valid ???
-                
-                [self logInfo:FORMAT(@"Received Audio Format: %d, %d, %d, %@, %@", (int)af.sampleRate, af.sampleSizeInBits, af.channels, af.isSigned ? @"signed" : @"unsigned", af.isBigEndian ? @"bigEndian" : @"littleEndian")];
-                
-                // Set Derived Audio Format vars also
-                afSampleSizeInBytes = af.sampleSizeInBits / 8; if (af.sampleSizeInBits % 8 != 0) { afSampleSizeInBytes++; }
-                afFrameSize = afSampleSizeInBytes * af.channels;
-                audioDataMaxValidSize = (ADPL_AUDIO_DATA_AVAILABLE_SIZE - (ADPL_AUDIO_DATA_AVAILABLE_SIZE % afFrameSize));
-                packetRateMS = (int)(1.0 / (af.sampleRate * afFrameSize / audioDataMaxValidSize) * 1000);
-                burstWatchdogTimerTimeout = ((packetRateMS / 1000.0) - 0.001);
-                
-                [self createAndStartNewAudioControllerAndSetup];
-            }
-        } else {
-            // Must be Audio Data packet
-            //NSLog(@"AUDIO DATA packet");
-            
-            audioDataPort = udpDataPort;
-            
-            numReceivedAudioDataPackets++;
-            
-            if (!isReceivingAudio) {
-                NSLog(@"Receiving audio again");
-                [self.lblReceivingAudio setTextColor:colorGreen];
-            }
-            isReceivingAudio = YES;
-            if (receivingAudioWatchdogTimer != nil) {
-                [receivingAudioWatchdogTimer invalidate];
-                receivingAudioWatchdogTimer = nil;
-            }
-            receivingAudioWatchdogTimer = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(onCurrentlyNotReceivingAudio) userInfo:nil repeats:NO];  // 0.1 => 10 fps "refresh rate" // 0.2 => 5 fps "refresh rate"
-            
-            if (isAudioFormatValid) {
-                
-                int numSkippedPackets = 0;
-                PcmAudioDataPayload *pcmAudioDataPayload = [[PcmAudioDataPayload alloc] initWithPayload:[dgData subdataWithRange:NSMakeRange(DG_DATA_HEADER_LENGTH, dgData.length-DG_DATA_HEADER_LENGTH)]];
-                
-                // Check if we need to reload or stop reloading the circBuffer
-                int currCircBufferDataSize = [self.dgChannel getBufferDataSize];
-                float currCircBufferDataSizeSecs = [self getNumAudioSecondsFromNumAudioBytes:currCircBufferDataSize];
-                if (currCircBufferDataSize == 0) {
-                    if (!isReloadingCircularBuffer) {
-                        // Pause/Stop audioController
-                        [self.audioController stop];
-                    }
-                    
-                    // Then the speaker HW ran out of audio to play. We'd better reload (refill) the circular buffer (i.e. stop playing until it's refilled with X amount of audio data)
-                    isReloadingCircularBuffer = YES;
-                } else {
-                    if (isReloadingCircularBuffer == YES) {
-                        if (currCircBufferDataSizeSecs >= self.desiredDelayLabel.text.floatValue) {
-                            // Restart the audioController
-                            isReloadingCircularBuffer = NO;
-                            [self startAudioController];
-                        }
-                    }
+            // Check if we need to reload or stop reloading the circBuffer
+            int currCircBufferDataSize = [self.dgChannel getBufferDataSize];
+            float currCircBufferDataSizeSecs = [self getNumAudioSecondsFromNumAudioBytes:currCircBufferDataSize];
+            if (currCircBufferDataSize == 0) {
+                if (!isReloadingCircularBuffer) {
+                    // Pause/Stop audioController
+                    [self.audioController stop];
                 }
                 
-                // Change playback speed if needed
-                [self changePlaybackSpeedIfNeededGivenCurrCircBufferDataSizeSecs:currCircBufferDataSizeSecs];
-                
-                // === Fill the Play Queue, based on sendMissingPacketsRequestsSwitch ===
-                SeqId *currSeqId = pcmAudioDataPayload.seqId;
-                if ([self.sendMissingPacketsRequestsSwitch isOn]) {
-                    
-                
-                
-                    //NSLog(@"==================================");
-                    //NSLog(@"pre-payloadStorageList(%d) -> [%@]", [payloadStorageList getSize], [payloadStorageList toString]);
-                    
-                    //SeqId *currSeqId = pcmAudioDataPayload.seqId;
-                    
-                    //NSLog(@"Received Audio Packet: (0x%04x) {%@}", currSeqId.intValue, [Util getUInt8FromData:dgData AtOffset:DG_DATA_HEADER_PAYLOAD_TYPE_START] == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING ? @"Missing" : @"Regular");
-                    
-                    if (!firstPacketReceived) {
-                        //NSLog(@"First Packet (0x%04x) JUST received (not counting any SKIPPED packets)", currSeqId.intValue);
-                        firstPacketReceived = YES;
-                        [self queueThisPayload:pcmAudioDataPayload];
-                    } else if ([currSeqId isLessThanOrEqualToSeqId:lastQueuedSeqId]) {
-                        //NSLog(@"This Packet (0x%04x) has already been received & Queued to be played. Not doing anything with the packet.", currSeqId.intValue);
-                    } else if ([currSeqId isEqualToSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
-                        //NSLog(@"This packet (0x%04x) is next in line for the Play Queue.", currSeqId.intValue);
-
-                        if ([payloadStorageList hasMissingPayloadAtFirstElementWithThisSeqId:currSeqId]) {
-                            //NSLog(@" Looks like it (0x%04x) was a 'missing packet' - GREAT, the Server sent it again! Regular or Missing: (%@). Queing it up & Removing it from missingPacketsSeqIdsList", currSeqId.intValue, [Util getUInt8FromData:dgData AtOffset:DG_DATA_HEADER_PAYLOAD_TYPE_START] == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING ? @"M" : @"R");
-                            
-                            [payloadStorageList popFirstPayload];
-                            [self queueThisPayload:pcmAudioDataPayload];
-                            
-                            [self checkForReadyToQueuePacketsInStorageList];  // This function also queues them up for playing if they exist.
-                            
-                            if ([payloadStorageList getTotalNumPayloads] == 0) {
-                                isWaitingOnMissingPackets = NO;
-                                //NSLog(@"NOT WAITING on Missing Packet(s) anymore!");
-                            } else {
-                                //NSLog(@"STILL WAITING on Missing Packet(s)!");
-                            }
-                        } else {
-                            // Check that we're in a good state
-                            if ([payloadStorageList hasMissingPayloadAtFirstElement]) {
-                                //NSLog(@" !!! Don't think we should get here! This packet (0x%04x) is next in line for Play Queue, but we have a missing payload (0x%04x) at the front of the StorageList. Anything 'missing' at the front of the StorageList should be holding up audio playback.", currSeqId.intValue, [payloadStorageList getFirstPayload].seqId.intValue);
-                            } else {
-                                //NSLog(@" there are NO missing packets at front of StorageList. Queing it (0x%04x) up to be played.", currSeqId.intValue);
-                                [self queueThisPayload:pcmAudioDataPayload];
-                            }
-                        }
-                    } else if ([currSeqId isGreaterThanSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
-
-                        numSkippedPackets = [currSeqId numSeqIdsExclusivelyBetweenMeAndSeqId:lastQueuedSeqId];
-                        //NSLog(@"%d packet(s) between NOW (0x%04x) and LAST_QUEUED (0x%04x). Updating payloadStorageList as appropriate", numSkippedPackets, currSeqId.intValue, lastQueuedSeqId.intValue);
-                        
-                        if (!isBurstMode) {
-                            //NSLog(@"---Burst Mode Started---");
-                        }
-                        isBurstMode = YES;
-                        
-                        Boolean addMissingPackets = NO;
-                        if (!isWaitingOnMissingPackets) {
-                            // Up to this point, we have NOT been waiting on any missing packets
-                            addMissingPackets = YES;
-                            highestMissingSeqId = [[SeqId alloc] initWithInt:currSeqId.intValue - 1];
-                        } else {
-                            // We are already waiting on 1 or more missing packets
-                            SeqId *currHighestMissingSeqId = [[SeqId alloc] initWithInt:currSeqId.intValue - 1];
-                            if ([currHighestMissingSeqId isGreaterThanSeqId:[[SeqId alloc] initWithInt:highestMissingSeqId.intValue + 1]]) {
-                                addMissingPackets = YES;
-                            }
-                            if ([currHighestMissingSeqId isGreaterThanSeqId:highestMissingSeqId]) {
-                                highestMissingSeqId = currHighestMissingSeqId;
-                            }
-                        }
-                        
-                        if (addMissingPackets) {
-                            //NSLog(@"ADDING Missing Packets Range to payloadStorageList");
-                            NSMutableArray *missingPayloadsArr = [[NSMutableArray alloc] init];
-                            for (int i = 0; i < numSkippedPackets; i++) {
-                                SeqId *missingSeqId = [[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1 + i];
-                                [missingPayloadsArr addObject:[[PcmAudioDataPayload alloc] initWithSeqId:missingSeqId]];
-                            }
-                            [payloadStorageList addIncrementingMissingPayloads:missingPayloadsArr];
-                        } else {
-                            //NSLog(@"NOT ADDING Missing Packets Range to payloadStorageList");
-                        }
-                        
-                        
-                        // Add received packet
-                        [payloadStorageList addFullPayload:pcmAudioDataPayload];
-                        
-                        isWaitingOnMissingPackets = YES;
+                // Then the speaker HW ran out of audio to play. We'd better reload (refill) the circular buffer (i.e. stop playing until it's refilled with X amount of audio data)
+                isReloadingCircularBuffer = YES;
+            } else {
+                if (isReloadingCircularBuffer == YES) {
+                    if (currCircBufferDataSizeSecs >= self.desiredDelayLabel.text.floatValue) {
+                        // Restart the audioController
+                        isReloadingCircularBuffer = NO;
+                        [self startAudioController];
                     }
-                } else {
-                    // sendMissingPacketsRequestsSwitch is OFF
-                    //  so just send packets to play queue as they arrive. Only exception is if only 1-3 packets are skipped, queue the received packet and repeat 1-3 times 'cuz it's "pretty likely" they were truly lost & not just out of order.
-                    
-                    // Check if this is a <Regular> or <Missing> packet. We only want to care about <Regular> packets.
-                    if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_REGULAR) {
-                        // Queue the payload
-                        [self queueThisPayload:pcmAudioDataPayload];
-                        lastQueuedSeqId = currSeqId;
+                }
+            }
+            
+            // Change playback speed if needed
+            [self changePlaybackSpeedIfNeededGivenCurrCircBufferDataSizeSecs:currCircBufferDataSizeSecs];
+            
+            // === Fill the Play Queue, based on sendMissingPacketsRequestsSwitch ===
+            SeqId *currSeqId = pcmAudioDataPayload.seqId;
+            if ([self.sendMissingPacketsRequestsSwitch isOn]) {
+                
+            
+            
+                //NSLog(@"==================================");
+                //NSLog(@"pre-payloadStorageList(%d) -> [%@]", [payloadStorageList getSize], [payloadStorageList toString]);
+                
+                //SeqId *currSeqId = pcmAudioDataPayload.seqId;
+                
+                //NSLog(@"Received Audio Packet: (0x%04x) {%@}", currSeqId.intValue, [Util getUInt8FromData:dgData AtOffset:DG_DATA_HEADER_PAYLOAD_TYPE_START] == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING ? @"Missing" : @"Regular");
+                
+                if (!firstPacketReceived) {
+                    //NSLog(@"First Packet (0x%04x) JUST received (not counting any SKIPPED packets)", currSeqId.intValue);
+                    firstPacketReceived = YES;
+                    [self queueThisPayload:pcmAudioDataPayload];
+                } else if ([currSeqId isLessThanOrEqualToSeqId:lastQueuedSeqId]) {
+                    //NSLog(@"This Packet (0x%04x) has already been received & Queued to be played. Not doing anything with the packet.", currSeqId.intValue);
+                } else if ([currSeqId isEqualToSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
+                    //NSLog(@"This packet (0x%04x) is next in line for the Play Queue.", currSeqId.intValue);
+
+                    if ([payloadStorageList hasMissingPayloadAtFirstElementWithThisSeqId:currSeqId]) {
+                        //NSLog(@" Looks like it (0x%04x) was a 'missing packet' - GREAT, the Server sent it again! Regular or Missing: (%@). Queing it up & Removing it from missingPacketsSeqIdsList", currSeqId.intValue, [Util getUInt8FromData:dgData AtOffset:DG_DATA_HEADER_PAYLOAD_TYPE_START] == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING ? @"M" : @"R");
                         
-                        // If X packets were skipped, fill in that space with a copy(s) of this packet
-                        //   will keep the buffer fuller, so we don't have to SLOW DOWN so much.
-                        //   the audio will still "skip" but it did that before, so nothing really lost in audio quality
-                        if ([currSeqId isGreaterThanSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
-                            numSkippedPackets = [currSeqId numSeqIdsExclusivelyBetweenMeAndSeqId:lastQueuedSeqId];
-                            if (numSkippedPackets <= 3) {
-                                for (int i = 0; i < numSkippedPackets; i++) {
-                                    [self queueThisPayload:pcmAudioDataPayload];  // Again
-                                }
+                        [payloadStorageList popFirstPayload];
+                        [self queueThisPayload:pcmAudioDataPayload];
+                        
+                        [self checkForReadyToQueuePacketsInStorageList];  // This function also queues them up for playing if they exist.
+                        
+                        if ([payloadStorageList getTotalNumPayloads] == 0) {
+                            isWaitingOnMissingPackets = NO;
+                            //NSLog(@"NOT WAITING on Missing Packet(s) anymore!");
+                        } else {
+                            //NSLog(@"STILL WAITING on Missing Packet(s)!");
+                        }
+                    } else {
+                        // Check that we're in a good state
+                        if ([payloadStorageList hasMissingPayloadAtFirstElement]) {
+                            //NSLog(@" !!! Don't think we should get here! This packet (0x%04x) is next in line for Play Queue, but we have a missing payload (0x%04x) at the front of the StorageList. Anything 'missing' at the front of the StorageList should be holding up audio playback.", currSeqId.intValue, [payloadStorageList getFirstPayload].seqId.intValue);
+                        } else {
+                            //NSLog(@" there are NO missing packets at front of StorageList. Queing it (0x%04x) up to be played.", currSeqId.intValue);
+                            [self queueThisPayload:pcmAudioDataPayload];
+                        }
+                    }
+                } else if ([currSeqId isGreaterThanSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
+
+                    numSkippedPackets = [currSeqId numSeqIdsExclusivelyBetweenMeAndSeqId:lastQueuedSeqId];
+                    //NSLog(@"%d packet(s) between NOW (0x%04x) and LAST_QUEUED (0x%04x). Updating payloadStorageList as appropriate", numSkippedPackets, currSeqId.intValue, lastQueuedSeqId.intValue);
+                    
+                    if (!isBurstMode) {
+                        //NSLog(@"---Burst Mode Started---");
+                    }
+                    isBurstMode = YES;
+                    
+                    Boolean addMissingPackets = NO;
+                    if (!isWaitingOnMissingPackets) {
+                        // Up to this point, we have NOT been waiting on any missing packets
+                        addMissingPackets = YES;
+                        highestMissingSeqId = [[SeqId alloc] initWithInt:currSeqId.intValue - 1];
+                    } else {
+                        // We are already waiting on 1 or more missing packets
+                        SeqId *currHighestMissingSeqId = [[SeqId alloc] initWithInt:currSeqId.intValue - 1];
+                        if ([currHighestMissingSeqId isGreaterThanSeqId:[[SeqId alloc] initWithInt:highestMissingSeqId.intValue + 1]]) {
+                            addMissingPackets = YES;
+                        }
+                        if ([currHighestMissingSeqId isGreaterThanSeqId:highestMissingSeqId]) {
+                            highestMissingSeqId = currHighestMissingSeqId;
+                        }
+                    }
+                    
+                    if (addMissingPackets) {
+                        //NSLog(@"ADDING Missing Packets Range to payloadStorageList");
+                        NSMutableArray *missingPayloadsArr = [[NSMutableArray alloc] init];
+                        for (int i = 0; i < numSkippedPackets; i++) {
+                            SeqId *missingSeqId = [[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1 + i];
+                            [missingPayloadsArr addObject:[[PcmAudioDataPayload alloc] initWithSeqId:missingSeqId]];
+                        }
+                        [payloadStorageList addIncrementingMissingPayloads:missingPayloadsArr];
+                    } else {
+                        //NSLog(@"NOT ADDING Missing Packets Range to payloadStorageList");
+                    }
+                    
+                    
+                    // Add received packet
+                    [payloadStorageList addFullPayload:pcmAudioDataPayload];
+                    
+                    isWaitingOnMissingPackets = YES;
+                }
+            } else {
+                // sendMissingPacketsRequestsSwitch is OFF
+                //  so just send packets to play queue as they arrive. Only exception is if only 1-3 packets are skipped, queue the received packet and repeat 1-3 times 'cuz it's "pretty likely" they were truly lost & not just out of order.
+                
+                // Check if this is a <Regular> or <Missing> packet. We only want to care about <Regular> packets.
+                if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_REGULAR) {
+                    // Queue the payload
+                    [self queueThisPayload:pcmAudioDataPayload];
+                    lastQueuedSeqId = currSeqId;
+                    
+                    // If X packets were skipped, fill in that space with a copy(s) of this packet
+                    //   will keep the buffer fuller, so we don't have to SLOW DOWN so much.
+                    //   the audio will still "skip" but it did that before, so nothing really lost in audio quality
+                    if ([currSeqId isGreaterThanSeqId:[[SeqId alloc] initWithInt:lastQueuedSeqId.intValue + 1]]) {
+                        numSkippedPackets = [currSeqId numSeqIdsExclusivelyBetweenMeAndSeqId:lastQueuedSeqId];
+                        if (numSkippedPackets <= 3) {
+                            for (int i = 0; i < numSkippedPackets; i++) {
+                                [self queueThisPayload:pcmAudioDataPayload];  // Again
                             }
                         }
                     }
