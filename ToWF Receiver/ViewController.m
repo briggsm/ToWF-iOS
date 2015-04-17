@@ -201,6 +201,9 @@ struct AudioFormat {
     Boolean isBurstMode;
     NSTimer *burstModeWatchdogTimer;
     
+    NSTimer *wifiSsidTimer;
+    NSString *prevSSID;
+    
 }
 
 @property (weak, nonatomic) IBOutlet UILabel *wifiConnection;
@@ -278,15 +281,7 @@ struct AudioFormat {
     NSDictionary *ssidInfo = [self fetchSSIDInfo];
     NSString *ssidStr = ssidInfo[@"SSID"];
     NSLog(@"ssidStr: %@", ssidStr);
-    if (ssidStr == NULL || [ssidStr isEqual: @""]) {
-        if (TARGET_IPHONE_SIMULATOR) {
-            [self.wifiConnection setText:@"Tercume"];  // Just to make it look nice for screenshots
-        } else {
-            [self.wifiConnection setText:@"<None>"];
-        }
-    } else {
-        [self.wifiConnection setText:ssidInfo[@"SSID"]];
-    }
+    [self setWifiConnectionLabel:ssidStr];
 
     // Setup UIPicker view for displaying selectable languages
     langPicker = [[UIPickerView alloc] init];
@@ -325,6 +320,9 @@ struct AudioFormat {
     
     isServerStreaming = NO;
     isReceivingAudio = NO;
+    
+    wifiSsidTimer = [NSTimer scheduledTimerWithTimeInterval:5.0 target:self selector:@selector(checkWifiSsidChange) userInfo:nil repeats:YES];
+    prevSSID = @"";
     
 }
 
@@ -1054,6 +1052,18 @@ struct AudioFormat {
     }
 }
 
+-(void)checkWifiSsidChange {
+    //NSLog(@"---checkWifiSsidChange");
+    // If changed, update wifiConnection label
+    NSDictionary *ssidInfo = [self fetchSSIDInfo];
+    NSString *currSSID = ssidInfo[@"SSID"];
+    //NSLog(@"prev: %@", prevSSID);
+    //NSLog(@"curr: %@", currSSID);
+    if (![currSSID isEqualToString:prevSSID]) {
+        [self setWifiConnectionLabel: currSSID];
+        prevSSID = currSSID;
+    }
+}
 
 - (NSDictionary *)fetchSSIDInfo {
     // Returns first non-empty SSID network info dictionary.
@@ -1074,6 +1084,18 @@ struct AudioFormat {
         }
     }
     return SSIDInfo;
+}
+
+-(void)setWifiConnectionLabel:(NSString*)str {
+    if (str == nil || [str isEqualToString:@""]) {
+        if (TARGET_IPHONE_SIMULATOR) {
+            [self.wifiConnection setText:@"Tercume"];  // Just to make it look nice for screenshots
+        } else {
+            [self.wifiConnection setText:@"<None>"];
+        }
+    } else {
+        [self.wifiConnection setText:str];
+    }
 }
 
 -(NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component {
@@ -1098,7 +1120,7 @@ struct AudioFormat {
 -(void)onAppEnteredForeground {
     // Fill in Wi-Fi Connection Label
     NSDictionary *ssidInfo = [self fetchSSIDInfo];
-    [self.wifiConnection setText:ssidInfo[@"SSID"]];
+    [self setWifiConnectionLabel:ssidInfo[@"SSID"]];
 }
 
 -(void)checkServerStoppedStreaming {
