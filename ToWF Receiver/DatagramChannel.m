@@ -65,7 +65,7 @@
     //uint32_t audioDataLength = (uint32_t)audioData.length;
     
     // Make our mono data into stereo, and put into circular buffers
-    int8_t tempBuf[audioData.length];
+    uint8_t tempBuf[audioData.length];
     [audioData getBytes:tempBuf range:NSMakeRange(0, audioData.length)];
     TPCircularBufferProduceBytes(&buffer1, tempBuf, (uint32_t)audioData.length);
     TPCircularBufferProduceBytes(&buffer2, tempBuf, (uint32_t)audioData.length);
