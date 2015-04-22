@@ -27,7 +27,7 @@
     return self;
 }
 - (id)initWithSeqId:(SeqId*)s {
-    // Note: creating this "constructor" so we can "compare" PcmAudioDataPayload's, and to compare them, we just check the SeqId of each.
+    // Note: creating this "constructor" so we can "compare" PcmAudioDataPayload's, and to compare them, we just check the SeqId of each. And to add a "missing" PcmAudioDataPayload.
     if (self = [super init]) {
         self.seqId = s;
         self.audioDataAllocatedBytes = 0;

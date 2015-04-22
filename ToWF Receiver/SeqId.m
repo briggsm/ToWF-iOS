@@ -14,7 +14,7 @@
     if (self = [super init])
     {
         if (i < 0) {
-            self.intValue = 0xFFFF - abs(i) + 1;
+            self.intValue = 0xFFFF - (abs(i) & 0xFFFF) + 1;
         } else {
             self.intValue = i & 0xFFFF;
         }

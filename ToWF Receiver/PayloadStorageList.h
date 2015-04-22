@@ -12,24 +12,26 @@
 @interface PayloadStorageList : NSObject
 
 - (id)init;
+
 -(void)addIncrementingMissingPayloads:(NSArray*)incrMissingPayloadsList;
 -(void)addFullPayload:(PcmAudioDataPayload*)payload;
+-(Boolean)hasPayloadAnywhereWithThisSeqId:(SeqId*)seqId;
 -(Boolean)hasMissingPayloadAtFirstElement;
 -(Boolean)hasMissingPayloadAtFirstElementWithThisSeqId:(SeqId*)seqId;
 -(Boolean)hasMissingPayloadAnywhereWithThisSeqId:(SeqId*)seqId;
 -(Boolean)hasFullPayloadAtFirstElement;
--(Boolean)hasFullPayloadAtFirstElementWithThisSeqId:(SeqId*)seqId;
+//-(Boolean)hasFullPayloadAtFirstElementWithThisSeqId:(SeqId*)seqId;
 -(Boolean)hasFullPayloadAnywhereWithThisSeqId:(SeqId*)seqId;
 -(PcmAudioDataPayload*)getFirstPayload;
 -(PcmAudioDataPayload*)popFirstPayload;
 -(void)removeAllPayloads;
 -(Boolean)replaceMissingPayloadWithFullPayload:(PcmAudioDataPayload*)fullPayload;
--(NSString*)toString;
--(NSString*)getMissingPayloadsSeqIdsAsHexString;
+//-(NSString*)toString;
+//-(NSString*)getMissingPayloadsSeqIdsAsHexString;
 -(NSString*)getAllPayloadsSeqIdsAsHexString;
 -(int)getTotalNumPayloads;
--(int)getNumMissingPayloads;
--(int)getNumFullPayloads;
+//-(int)getNumMissingPayloads;
+//-(int)getNumFullPayloads;
 -(NSArray*)getMissingPayloads;
 -(void)removeMissingPayloadsInFirstXPayloads:(int)numPayloadsToRemove;
 

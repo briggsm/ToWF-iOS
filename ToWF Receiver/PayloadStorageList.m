@@ -32,7 +32,7 @@
 }
 
 -(void)addIncrementingMissingPayloads:(NSArray*)incrMissingPayloadsList {
-    // missingPayloadsList ought to (must) have Incrementing seqId's
+    // missingPayloadsList must have Incrementing seqId's
     
     if (incrMissingPayloadsList.count == 0) {
         return;
