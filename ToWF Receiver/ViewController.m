@@ -58,17 +58,18 @@
 #define OS_IOS 1
 #define OS_ANDROID 2
 
-
+// Audio Format Related
 #define AFDG_SAMPLE_RATE_START (DG_DATA_HEADER_LENGTH + 0)
 #define AFDG_SAMPLE_RATE_LENGTH 4
-#define AFDG_SAMPLE_SIZE_IN_BITS_START (DG_DATA_HEADER_LENGTH + 4)
-#define AFDG_SAMPLE_SIZE_IN_BITS_LENGTH 1
-#define AFDG_CHANNELS_START (DG_DATA_HEADER_LENGTH + 5)
-#define AFDG_CHANNELS_LENGTH 1
-#define AFDG_SIGNED_START (DG_DATA_HEADER_LENGTH + 6)
-#define AFDG_SIGNED_LENGTH 1
-#define AFDG_BIG_ENDIAN_START (DG_DATA_HEADER_LENGTH + 7)
-#define AFDG_BIG_ENDIAN_LENGTH 1
+
+#define AF_SAMPLE_SIZE_IN_BITS 16
+#define AF_CHANNELS 1
+#define AF_SIGNED YES
+#define AF_BIG_ENDIAN NO
+
+#define AF_SAMPLE_SIZE_IN_BYTES 2
+#define AF_FRAME_SIZE (AF_SAMPLE_SIZE_IN_BYTES * AF_CHANNELS)
+#define AUDIO_DATA_MAX_VALID_SIZE (ADPL_AUDIO_DATA_AVAILABLE_SIZE - (ADPL_AUDIO_DATA_AVAILABLE_SIZE % AF_FRAME_SIZE))
 
 // Audio Data Payload Constants
 #define ADPL_AUDIO_DATA_AVAILABLE_SIZE (UDP_DATA_PAYLOAD_SIZE - ADPL_HEADER_LENGTH)
@@ -127,16 +128,6 @@
 //#define MPR_DELAY_RESET 5  // Number(X) of Frames that we must receive, where all X Frame are NOT the first missing packet in our payloadStorageList. If mprDelayTimer reaches 0, THEN we'll send MissingPacketRequest (if any)
 
 
-
-struct AudioFormat {
-    float sampleRate;
-    uint8_t sampleSizeInBits;
-    uint8_t channels;
-    BOOL isSigned;
-    BOOL isBigEndian;
-};
-
-
 @interface ViewController ()
 {
     BOOL isListening;
@@ -149,14 +140,12 @@ struct AudioFormat {
     float maxAudioDelaySecs;
     
     // Audio Format
-    struct AudioFormat af;
+    float afSampleRate;
     BOOL isAudioFormatValid;
 
     // Audio Format - Derived
-    uint8_t afSampleSizeInBytes;
-    uint8_t afFrameSize;
-    uint32_t audioDataMaxValidSize;
     int packetRateMS;
+    
     NSTimeInterval burstModeWatchdogTimerTimeout;
     
     long numReceivedAudioDataPackets;
@@ -256,14 +245,14 @@ struct AudioFormat {
         [self logError:FORMAT(@"Error beginReceiving for infoSocket: %@", error)];
         return;
     }
-    [self logInfo:FORMAT(@"Listening for INFO on port %hu", [infoSocket localPort])];
+    [self logInfo:FORMAT(@"Listening for INFO on port: %hu", [infoSocket localPort])];
     
     maxAudioDelaySecs = 0.25;  // Default
     
     isAudioFormatValid = NO;
     playbackRate = 1.0;  // 1x speed.
     playFaster = NO;
-    af.sampleRate = 0;  // An invalid sample rate
+    afSampleRate = 0;
 
     colorVeryLightGray = [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1];
     colorGreen = [UIColor colorWithRed:0 green:0.5 blue:0 alpha:1];
@@ -415,7 +404,7 @@ struct AudioFormat {
         return;
     }
     
-    [self logInfo:FORMAT(@"Started listening on port %hu", [udpSocket localPort])];
+    [self logInfo:FORMAT(@"Started listening on port: %hu", [udpSocket localPort])];
     isListening = YES;
     if (!isAudioFormatValid) {
         [self logInfo:FORMAT(@"Waiting for Audio Format packet...")];
@@ -636,37 +625,21 @@ struct AudioFormat {
             
             // Set afdg vars
             uint32_t afdgSampleRate = [Util getUInt32FromData:dgData AtOffset:AFDG_SAMPLE_RATE_START BigEndian:NO];
-            uint8_t afdgSampleSizeInBits = [Util getUInt8FromData:dgData AtOffset:AFDG_SAMPLE_SIZE_IN_BITS_START];
-            uint8_t afdgChannels = [Util getUInt8FromData:dgData AtOffset:AFDG_CHANNELS_START];
-            BOOL afdgIsSigned = [Util getUInt8FromData:dgData AtOffset:AFDG_SIGNED_START] == 1 ? YES : NO;
-            BOOL afdgIsBigEndian = [Util getUInt8FromData:dgData AtOffset:AFDG_BIG_ENDIAN_START] == 1 ? YES : NO;
             
             // If different than before, update the current audio format to the new values
-            if (afdgSampleRate != (uint32_t)af.sampleRate || afdgSampleSizeInBits != af.sampleSizeInBits || afdgChannels != af.channels || afdgIsSigned != af.isSigned || afdgIsBigEndian != af.isBigEndian) {
-                // Update "af" Audio Format
-                af.sampleRate = afdgSampleRate;
-                af.sampleSizeInBits = afdgSampleSizeInBits;
-                af.channels = afdgChannels;
-                af.isSigned = afdgIsSigned;
-                af.isBigEndian = afdgIsBigEndian;
-                
+            if (afdgSampleRate != (uint32_t)afSampleRate) {
+                // Update afSampleRate
+                afSampleRate = (float)afdgSampleRate;
                 NSLog(@"Audio Format changed! Updated to: ");
-                NSLog(@" Sample Rate: %d", (uint32_t)af.sampleRate);
-                NSLog(@" Sample Size (in bits): %d", af.sampleSizeInBits);
-                NSLog(@" Channels: %d", af.channels);
-                NSLog(@" isSigned: %@", af.isSigned ? @"YES" : @"NO");
-                NSLog(@" isBigEndian: %@", af.isBigEndian ? @"YES" : @"NO");
+                NSLog(@" Sample Rate: %d", (uint32_t)afSampleRate);
                 
                 isAudioFormatValid = YES;
                 // ??? Maybe later add a check to make sure this is REALLY valid ???
                 
-                [self logInfo:FORMAT(@"Received Audio Format: %d, %d, %d, %@, %@", (int)af.sampleRate, af.sampleSizeInBits, af.channels, af.isSigned ? @"signed" : @"unsigned", af.isBigEndian ? @"bigEndian" : @"littleEndian")];
+                [self logInfo:FORMAT(@"Sample Rate: %d Hz", (int)afSampleRate)];
                 
                 // Set Derived Audio Format vars also
-                afSampleSizeInBytes = af.sampleSizeInBits / 8; if (af.sampleSizeInBits % 8 != 0) { afSampleSizeInBytes++; }
-                afFrameSize = afSampleSizeInBytes * af.channels;
-                audioDataMaxValidSize = (ADPL_AUDIO_DATA_AVAILABLE_SIZE - (ADPL_AUDIO_DATA_AVAILABLE_SIZE % afFrameSize));
-                packetRateMS = (int)(1.0 / (af.sampleRate * afFrameSize / audioDataMaxValidSize) * 1000);
+                packetRateMS = (int)(1.0 / (afSampleRate * AF_FRAME_SIZE / AUDIO_DATA_MAX_VALID_SIZE) * 1000);
                 burstModeWatchdogTimerTimeout = ((packetRateMS / 1000.0) - 0.001);
                 
                 [self createAndStartNewAudioControllerAndSetup];
@@ -920,11 +893,11 @@ struct AudioFormat {
 
 
 -(float) getNumAudioSecondsFromNumAudioBytes:(uint32_t)numBytes {
-    return numBytes / af.sampleRate / afSampleSizeInBytes / af.channels;
+    return numBytes / afSampleRate / AF_SAMPLE_SIZE_IN_BYTES / AF_CHANNELS;
 }
 
 -(uint32_t) getNumAudioBytesFromNumAudioSeconds:(float)audioSeconds {
-    return (uint32_t)(audioSeconds * af.sampleRate * afSampleSizeInBytes * af.channels);
+    return (uint32_t)(audioSeconds * afSampleRate * AF_SAMPLE_SIZE_IN_BYTES * AF_CHANNELS);
 }
 
 -(void) createAndStartNewAudioControllerAndSetup {
@@ -950,11 +923,11 @@ struct AudioFormat {
         audioDescription.mFormatID          = kAudioFormatLinearPCM;
         audioDescription.mFormatFlags       = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked | kAudioFormatFlagIsNonInterleaved;  // Note: setting up as "non-interleaved" makes copying mono data into the 2 stereo buffers much faster.
         audioDescription.mChannelsPerFrame  = 2;
-        audioDescription.mBytesPerPacket    = afSampleSizeInBytes;
+        audioDescription.mBytesPerPacket    = AF_SAMPLE_SIZE_IN_BYTES;
         audioDescription.mFramesPerPacket   = 1;
-        audioDescription.mBytesPerFrame     = afSampleSizeInBytes;
-        audioDescription.mBitsPerChannel    = af.sampleSizeInBits;
-        audioDescription.mSampleRate        = af.sampleRate;
+        audioDescription.mBytesPerFrame     = AF_SAMPLE_SIZE_IN_BYTES;
+        audioDescription.mBitsPerChannel    = AF_SAMPLE_SIZE_IN_BITS;
+        audioDescription.mSampleRate        = afSampleRate;
         
         // Create Audio Controller
         self.audioController = [[AEAudioController alloc]
@@ -1163,7 +1136,7 @@ struct AudioFormat {
     //      If payloadStorageList is too big, we must cut it down to size here, then request whatever missingPayloads are left.
     if ([payloadStorageList getMissingPayloads].count > 0) {
         
-        float payloadStorageListSizeSecs = [self getNumAudioSecondsFromNumAudioBytes:[payloadStorageList getTotalNumPayloads]*audioDataMaxValidSize];
+        float payloadStorageListSizeSecs = [self getNumAudioSecondsFromNumAudioBytes:[payloadStorageList getTotalNumPayloads]*AUDIO_DATA_MAX_VALID_SIZE];
         
         //NSLog(@"============================");
         //NSLog(@"payloadStorageList.totalNumPayloads: %d", [payloadStorageList getTotalNumPayloads]);
@@ -1178,7 +1151,7 @@ struct AudioFormat {
             //NSLog(@"numSecsToCut: %f", numSecsToCut);
             uint32_t numBytesToCut = [self getNumAudioBytesFromNumAudioSeconds:numSecsToCut];
             //NSLog(@"numBytesToCut: %d", numBytesToCut);
-            uint32_t numPayloadsToCut = numBytesToCut / audioDataMaxValidSize;
+            uint32_t numPayloadsToCut = numBytesToCut / AUDIO_DATA_MAX_VALID_SIZE;
             //NSLog(@"numPayloadsToCut: %d", numPayloadsToCut);
             if (numPayloadsToCut > 0) {
                 //NSLog(@"payloadStorageList.totalNumPayloads(Before): %d", [payloadStorageList getTotalNumPayloads]);
