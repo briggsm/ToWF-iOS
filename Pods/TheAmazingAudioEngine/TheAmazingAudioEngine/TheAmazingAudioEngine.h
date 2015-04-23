@@ -113,8 +113,8 @@ extern "C" {
  3. In the "Build Phases" tab of your main target, open up the "Target Dependencies" section, press the "+" button,
     and select "TheAmazingAudioEngine".
  4. In the "Link Binary with Libraries" section, press the "+" button, and select "libTheAmazingAudioEngine.a".
- 5. If "AudioToolbox.framework" and "Accelerate.framework" aren't already in the "Link Binary with Libraries" section,
-    press the "+" button again, and add them both.
+ 5. If "AudioToolbox.framework", "AVFoundation.framework" and "Accelerate.framework" aren't already in the "Link Binary with Libraries" section,
+    press the "+" button again, and add them all.
  6. In the "Build Settings" tab, find the "Header Search Paths" item and add the path to the "TheAmazingAudioEngine"
     folder. For example, if you put the distribution into "Library/The Amazing Audio Engine", you might enter
     `"Library/The Amazing Audio Engine/TheAmazingAudioEngine"`.
@@ -213,9 +213,10 @@ extern "C" {
  }];
  @endcode
  
- The block will be called with a timestamp that corresponds to the time the audio will reach the device
- audio output (automatically compensated for device latency), the number of audio frames you are expected
- to produce, and an AudioBufferList in which to store the generated audio.
+ The block will be called with a timestamp which, when adjusted by the value returned from
+ @link AEAudioControllerOutputLatency AEAudioController::AEAudioControllerOutputLatency @endlink,
+ corresponds to the time the audio will reach the device audio output; the number of audio frames 
+ you are expected to produce, and an AudioBufferList in which to store the generated audio.
  
  @section Object-Channels Objective-C Object Channels
  

@@ -30,22 +30,22 @@
 @class ABFilterPort;
 @class ABPort;
 
-extern NSString * ABConnectionsChangedNotification;
+extern NSString * const ABConnectionsChangedNotification;
 
 void ABReceiverPortReceive(ABReceiverPort *receiverPort, ABPort *sourcePortOrNil, AudioBufferList *bufferList, UInt32 lengthInFrames, AudioTimeStamp *outTimestamp);
 BOOL ABReceiverPortIsConnected(ABReceiverPort *receiverPort);
 BOOL ABFilterPortIsConnected(ABFilterPort *filterPort);
-BOOL ABSenderPortSend(ABSenderPort* senderPort, const AudioBufferList *audio, UInt32 lengthInFrames, const AudioTimeStamp *timestamp);
+void ABSenderPortSend(ABSenderPort* senderPort, const AudioBufferList *audio, UInt32 lengthInFrames, const AudioTimeStamp *timestamp);
 BOOL ABSenderPortIsConnected(ABSenderPort *senderPort);
 BOOL ABSenderPortIsMuted(ABSenderPort *senderPort);
 NSTimeInterval ABSenderPortGetAverageLatency(ABSenderPort *senderPort);
 typedef void (^ABReceiverPortAudioInputBlock)(ABReceiverPort *receiverPort, UInt32 lengthInFrames, AudioTimeStamp nextTimestamp, ABPort *sourcePortOrNil);
 
-@interface NSObject ()
+@protocol AEAudiobusForwardDeclarationsProtocol <NSObject>
 - (AudioStreamBasicDescription)clientFormat;
 - (void)setClientFormat:(AudioStreamBasicDescription)clientFormat;
 - (BOOL)connectedToSelf;
 - (void)setAutomaticMonitoring:(BOOL)automaticMonitoring;
 - (AudioUnit)audioUnit;
-//- (BOOL)connected;
+- (BOOL)connected;
 @end

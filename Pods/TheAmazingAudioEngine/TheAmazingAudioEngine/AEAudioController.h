@@ -446,17 +446,6 @@ typedef void (*AEAudioControllerMainThreadMessageHandler)(AEAudioController *aud
 ///@{
 
 /*!
- * Canonical Audio Unit audio description
- *
- *  This is the non-interleaved audio description associated with the kAudioFormatFlagsAudioUnitCanonical flag,
- *  at 44.1kHz that can be used with @link initWithAudioDescription: @endlink.
- *
- *  This is the 8.24 fixed-point audio format recommended by Apple, although it is relatively 
- *  inconvenient to work with individual samples without converting.
- */
-+ (AudioStreamBasicDescription)audioUnitCanonicalAudioDescription;
-
-/*!
  * 16-bit stereo audio description, interleaved
  *
  *  This is a 16-bit signed PCM, stereo, interleaved format at 44.1kHz that can be used
@@ -1118,6 +1107,8 @@ NSTimeInterval AEConvertFramesToSeconds(AEAudioController *audioController, long
 /*!
  * Whether to use the "Measurement" Audio Session Mode for improved audio quality and bass response.
  *
+ *  Note also the @link avoidMeasurementModeForBuiltInMic @endlink property.
+ *
  * Default: NO
  */
 @property (nonatomic, assign) BOOL useMeasurementMode;
@@ -1235,7 +1226,7 @@ NSTimeInterval AEConvertFramesToSeconds(AEAudioController *audioController, long
  *  values for greater latency with lower processing overhead.  This parameter affects
  *  the length of the audio buffers received by the various callbacks.
  *
- *  Default is 0.005.
+ *  System default is ~23ms, or 1024 frames.
  */
 @property (nonatomic, assign) NSTimeInterval preferredBufferDuration;
 
@@ -1339,6 +1330,8 @@ NSTimeInterval AEConvertFramesToSeconds(AEAudioController *audioController, long
  *
  *      timestamp.mHostTime += AEAudioControllerInputLatency(audioController)*__secondsToHostTicks;
  *
+ *  Note that you should not use this value when connected to Audiobus, as it does not apply in this case.
+ *
  * @param controller The audio controller
  * @returns The currently-reported hardware input latency
  */
@@ -1352,6 +1345,8 @@ NSTimeInterval AEAudioControllerInputLatency(AEAudioController *controller);
  *  For example:
  *
  *      timestamp.mHostTime += AEAudioControllerOutputLatency(audioController)*__secondsToHostTicks;
+ *
+ *  Note that when connected to Audiobus, this value will automatically account for any Audiobus latency.
  *
  * @param controller The audio controller
  * @returns The currently-reported hardware output latency
