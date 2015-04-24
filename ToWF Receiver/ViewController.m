@@ -285,7 +285,7 @@
     langPortPairs = [[LangPortPairs alloc] init];
     
     // observer checks if we're back from the background
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppEnteredForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppWillEnterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
     
     isReloadingCircularBuffer = NO;
     
@@ -891,6 +891,37 @@
     }
 }
 
+- (void)udpSocketDidClose:(GCDAsyncUdpSocket *)sock withError:(NSError *)error {
+    // When device is LOCKED (screen turned OFF), then when turned back on, and app entered, infoSocket "breaks" - udpSocket:didReceiveData: delegate never gets called again. But this function is called, with error.code == 57 (Socket is not connected). At least on my iPhone 3GS (iOS 6) and iPhone6 (iOS 8) this happens. Once in a while the error.code is 4 (Socket closed).
+    // Tried adding to onAppWillEnterForeground: (but similar problems: 'sometimes' the socket says it's closed sometimes not, sometimes port == 0 sometimes port == random number.)
+
+    NSString *whichSock = [sock isEqual:udpSocket] ? @"udpSocket" : @"infoSocket";
+    NSLog(@"***udpSocketDidCLOSE! Sock: %@, Error: %@", whichSock, error);
+    NSLog(@" sockets current port: %d", [sock localPort]);
+
+    // If infoSocket CLOSED with error, try to recover.
+    if ([sock isEqual:infoSocket] && error != nil) {
+        if ([sock localPort] != 0) {
+            NSLog(@" socket has NON-ZERO (and not 7769) port #. Weird state. Let's try closing the socket yet AGAIN.");
+            [sock close];  // Rest of the code in the function will execute, then udpSocketDidClose: will be called again because of this 'close' call (with nil error) for infoSocket connected to port 7769. So we just need to check that local port is not 7769 so we don't close the one we just got working!
+        }
+        
+        NSLog(@"Trying (AGAIN) to connect infoSocket...");
+        NSError *error = nil;
+        if (![infoSocket bindToPort:INFO_PORT_NUMBER error:&error]) {
+            [self logError:FORMAT(@"Error (AGAIN) binding to port for infoSocket: %@", error)];
+            NSLog(@"Error (AGAIN) binding to port for infoSocket: %@", error);
+            //return;  // Don't "return" just in case beginReceiving will still work... (doubtful, but shouldn't hurt to try)
+        }
+        if (![infoSocket beginReceiving:&error]) {
+            [infoSocket close];
+            [self logError:FORMAT(@"Error (AGAIN) beginReceiving for infoSocket: %@", error)];
+            NSLog(@"Error (AGAIN) beginReceiving for infoSocket: %@", error);
+            return;
+        }
+        NSLog(@"Listening (AGAIN) for INFO on port: %hu", [infoSocket localPort]);
+    }
+}
 
 -(float) getNumAudioSecondsFromNumAudioBytes:(uint32_t)numBytes {
     return numBytes / afSampleRate / AF_SAMPLE_SIZE_IN_BYTES / AF_CHANNELS;
@@ -1088,7 +1119,8 @@
     [self.languageTF resignFirstResponder];
 }
 
--(void)onAppEnteredForeground {
+-(void)onAppWillEnterForeground {
+    //NSLog(@"--onAppWillEnterForeground function");
     // Fill in Wi-Fi Connection Label
     NSDictionary *ssidInfo = [self fetchSSIDInfo];
     [self setWifiConnectionLabel:ssidInfo[@"SSID"]];
