@@ -6,6 +6,12 @@
 // project.
 
 
+// CocoaAsyncSocket
+#define COCOAPODS_POD_AVAILABLE_CocoaAsyncSocket
+#define COCOAPODS_VERSION_MAJOR_CocoaAsyncSocket 7
+#define COCOAPODS_VERSION_MINOR_CocoaAsyncSocket 4
+#define COCOAPODS_VERSION_PATCH_CocoaAsyncSocket 1
+
 // TheAmazingAudioEngine
 #define COCOAPODS_POD_AVAILABLE_TheAmazingAudioEngine
 #define COCOAPODS_VERSION_MAJOR_TheAmazingAudioEngine 1

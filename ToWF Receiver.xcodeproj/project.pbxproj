@@ -14,7 +14,6 @@
 		4782D1451A2C7FDE0007C9DD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4782D1431A2C7FDE0007C9DD /* Main.storyboard */; };
 		4782D1471A2C7FDE0007C9DD /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4782D1461A2C7FDE0007C9DD /* Images.xcassets */; };
 		4782D14A1A2C7FDE0007C9DD /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4782D1481A2C7FDE0007C9DD /* LaunchScreen.xib */; };
-		4782D1611A2C8F2C0007C9DD /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 4782D1601A2C8F2C0007C9DD /* GCDAsyncUdpSocket.m */; };
 		47A7409D1A9210D5000E0515 /* LangPortPairs.m in Sources */ = {isa = PBXBuildFile; fileRef = 47A7409C1A9210D5000E0515 /* LangPortPairs.m */; };
 		47CEF1041A2DCE2C003EF720 /* DatagramChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = 47CEF1031A2DCE2C003EF720 /* DatagramChannel.m */; };
 		47EF2B991ACD513900F6A56A /* PcmAudioDataPayload.m in Sources */ = {isa = PBXBuildFile; fileRef = 47EF2B981ACD513900F6A56A /* PcmAudioDataPayload.m */; };
@@ -47,8 +46,6 @@
 		4782D1461A2C7FDE0007C9DD /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		4782D1491A2C7FDE0007C9DD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		4782D14F1A2C7FDE0007C9DD /* ToWF ReceiverTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ToWF ReceiverTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4782D15F1A2C8F2C0007C9DD /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDAsyncUdpSocket.h; path = "../../Xcode Libs/CocoaAsyncSocket/GCD/GCDAsyncUdpSocket.h"; sourceTree = "<group>"; };
-		4782D1601A2C8F2C0007C9DD /* GCDAsyncUdpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDAsyncUdpSocket.m; path = "../../Xcode Libs/CocoaAsyncSocket/GCD/GCDAsyncUdpSocket.m"; sourceTree = "<group>"; };
 		47A7409B1A9210D5000E0515 /* LangPortPairs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LangPortPairs.h; sourceTree = "<group>"; };
 		47A7409C1A9210D5000E0515 /* LangPortPairs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LangPortPairs.m; sourceTree = "<group>"; };
 		47CEF1021A2DCE2C003EF720 /* DatagramChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DatagramChannel.h; sourceTree = "<group>"; };
@@ -97,7 +94,6 @@
 		4782D12D1A2C7FDE0007C9DD = {
 			isa = PBXGroup;
 			children = (
-				4782D1621A2C8F380007C9DD /* UDP */,
 				4782D1381A2C7FDE0007C9DD /* ToWF Receiver */,
 				4782D1371A2C7FDE0007C9DD /* Products */,
 				3EA73B73E4DD98CF4AFC0B32 /* Pods */,
@@ -149,15 +145,6 @@
 				4782D13B1A2C7FDE0007C9DD /* main.m */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		4782D1621A2C8F380007C9DD /* UDP */ = {
-			isa = PBXGroup;
-			children = (
-				4782D15F1A2C8F2C0007C9DD /* GCDAsyncUdpSocket.h */,
-				4782D1601A2C8F2C0007C9DD /* GCDAsyncUdpSocket.m */,
-			);
-			name = UDP;
 			sourceTree = "<group>";
 		};
 		81879E1D8348EFA91CD1DD23 /* Frameworks */ = {
@@ -310,7 +297,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4782D1611A2C8F2C0007C9DD /* GCDAsyncUdpSocket.m in Sources */,
 				47EF2B991ACD513900F6A56A /* PcmAudioDataPayload.m in Sources */,
 				4782D1421A2C7FDE0007C9DD /* ViewController.m in Sources */,
 				47A7409D1A9210D5000E0515 /* LangPortPairs.m in Sources */,
