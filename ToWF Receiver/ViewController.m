@@ -238,14 +238,17 @@
     NSError *error = nil;
     if (![infoSocket bindToPort:INFO_PORT_NUMBER error:&error]) {
         [self logError:FORMAT(@"Error binding to port for infoSocket: %@", error)];
+        NSLog(@"Error binding to port for infoSocket: %@", error);
         return;
     }
     if (![infoSocket beginReceiving:&error]) {
         [infoSocket close];
         [self logError:FORMAT(@"Error beginReceiving for infoSocket: %@", error)];
+        NSLog(@"Error beginReceiving for infoSocket: %@", error);
         return;
     }
-    [self logInfo:FORMAT(@"Listening for INFO on port: %hu", [infoSocket localPort])];
+    //[self logInfo:FORMAT(@"Listening for INFO on port: %hu", [infoSocket localPort])];
+    NSLog(@"Listening for INFO on port: %hu", [infoSocket localPort]);
     
     maxAudioDelaySecs = 0.25;  // Default
     
@@ -356,7 +359,8 @@
     // Stop Socket-related
     [udpSocket close];
     
-    [self logInfo:@"Stopped Listening"];
+    //[self logInfo:@"Stopped Listening"];
+    //NSLog(@"Stopped Listening");
     isListening = NO;
     
     [self sendClientListeningWithIsListening:isListening Port:streamPort];
@@ -404,10 +408,12 @@
         return;
     }
     
-    [self logInfo:FORMAT(@"Started listening on port: %hu", [udpSocket localPort])];
+    //[self logInfo:FORMAT(@"Started listening on port: %hu", [udpSocket localPort])];
+    NSLog(@"Started listening on port: %hu", [udpSocket localPort]);
     isListening = YES;
     if (!isAudioFormatValid) {
-        [self logInfo:FORMAT(@"Waiting for Audio Format packet...")];
+        //[self logInfo:FORMAT(@"Waiting for Audio Format packet...")];
+        NSLog(@"Waiting for Audio Format packet...");
     }
     
     
@@ -636,7 +642,7 @@
                 isAudioFormatValid = YES;
                 // ??? Maybe later add a check to make sure this is REALLY valid ???
                 
-                [self logInfo:FORMAT(@"Sample Rate: %d Hz", (int)afSampleRate)];
+                //[self logInfo:FORMAT(@"Sample Rate: %d Hz", (int)afSampleRate)];
                 
                 // Set Derived Audio Format vars also
                 packetRateMS = (int)(1.0 / (afSampleRate * AF_FRAME_SIZE / AUDIO_DATA_MAX_VALID_SIZE) * 1000);
