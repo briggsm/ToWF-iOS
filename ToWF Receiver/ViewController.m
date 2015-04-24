@@ -1207,7 +1207,7 @@
         
         NSArray *missingPayloads = [payloadStorageList getMissingPayloads];
         [self sendMissingPacketsRequestWithPort:audioDataPort AndMissingPayloads:missingPayloads];
-        //NSLog(@"Sending **MISSING PACKETS REQUEST** with port:%d, and ALL missing payloads(%d): %@", audioDataPort, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
+        NSLog(@"Sending **MISSING PACKETS REQUEST** with port:%d, and ALL missing payloads(%d): %@", audioDataPort, (int)missingPayloads.count, [payloadStorageList getMissingPayloadsSeqIdsAsHexString]);
         
         
         

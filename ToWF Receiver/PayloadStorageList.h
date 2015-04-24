@@ -27,7 +27,7 @@
 -(void)removeAllPayloads;
 -(Boolean)replaceMissingPayloadWithFullPayload:(PcmAudioDataPayload*)fullPayload;
 //-(NSString*)toString;
-//-(NSString*)getMissingPayloadsSeqIdsAsHexString;
+-(NSString*)getMissingPayloadsSeqIdsAsHexString;
 -(NSString*)getAllPayloadsSeqIdsAsHexString;
 -(int)getTotalNumPayloads;
 //-(int)getNumMissingPayloads;
