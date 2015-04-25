@@ -14,6 +14,7 @@
 #import "PcmAudioDataPayload.h"
 #import "SeqId.h"
 #import "PayloadStorageList.h"
+#import <AVFoundation/AVFoundation.h>
 #import <sys/utsname.h>
 @import SystemConfiguration.CaptiveNetwork;
 
@@ -194,6 +195,8 @@
     NSTimer *wifiSsidTimer;
     NSString *prevSSID;
     
+    AVAudioPlayer *dripSoundPlayer;
+    
 }
 
 @property (weak, nonatomic) IBOutlet UILabel *wifiConnection;
@@ -317,6 +320,14 @@
     wifiSsidTimer = [NSTimer scheduledTimerWithTimeInterval:5.0 target:self selector:@selector(checkWifiSsidChange) userInfo:nil repeats:YES];
     prevSSID = @"";
     
+    // Setup the 'drip' sound player
+    NSError *err;
+    NSString *dripPath = [NSString stringWithFormat:@"%@/drip.mp3", [[NSBundle mainBundle] resourcePath]];
+    NSURL *dripUrl = [NSURL fileURLWithPath:dripPath];
+    dripSoundPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:dripUrl error:&err];
+    if (err != nil) {
+        NSLog(@"ERROR with dripSoundPlayer: %@", err);
+    }
 }
 
 - (void)didReceiveMemoryWarning {
@@ -687,7 +698,8 @@
             NSString *msg = [Util getNullTermStringFromData:dgData AtOffset:CHATMSG_MSG_START WithMaxLength:UDP_DATA_PAYLOAD_SIZE];
             [self logMessage:[NSString stringWithFormat:@"Server: %@", msg]];
 
-            // To-Do: Beep
+            // Beep
+            [dripSoundPlayer play];
             
         } else if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_RLS) {
             [self sendClientListeningWithIsListening:isListening Port:streamPort];
@@ -1300,11 +1312,12 @@ NSString* deviceName() {
     
     NSString *msg = self.chatMsgTF.text;
 
-    
     if (![msg isEqualToString:@""]) {
         self.chatMsgTF.text = @"";  // Clear text field
         [self logMessage:[NSString stringWithFormat:@"Me: %@", msg]];  // Show msg in the web-view
         [self sendChatMsgToServer:msg]; // Send msg to Server
+        // Beep
+        [dripSoundPlayer play];
     }
 }
 

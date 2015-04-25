@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		474EF2981A31D10F00076F12 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 474EF2971A31D10F00076F12 /* Media.xcassets */; };
+		476BE0E81AEBCB59005CF0AA /* drip.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 476BE0E71AEBCB59005CF0AA /* drip.mp3 */; };
+		476BE0ED1AEC0FA9005CF0AA /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 476BE0EC1AEC0FA9005CF0AA /* AVFoundation.framework */; };
 		4782D13C1A2C7FDE0007C9DD /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4782D13B1A2C7FDE0007C9DD /* main.m */; };
 		4782D13F1A2C7FDE0007C9DD /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4782D13E1A2C7FDE0007C9DD /* AppDelegate.m */; };
 		4782D1421A2C7FDE0007C9DD /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4782D1411A2C7FDE0007C9DD /* ViewController.m */; };
@@ -35,6 +37,8 @@
 
 /* Begin PBXFileReference section */
 		474EF2971A31D10F00076F12 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
+		476BE0E71AEBCB59005CF0AA /* drip.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = drip.mp3; sourceTree = "<group>"; };
+		476BE0EC1AEC0FA9005CF0AA /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		4782D1361A2C7FDE0007C9DD /* ToWF Receiver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ToWF Receiver.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4782D13A1A2C7FDE0007C9DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4782D13B1A2C7FDE0007C9DD /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -68,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				476BE0ED1AEC0FA9005CF0AA /* AVFoundation.framework in Frameworks */,
 				FD07803DBE731D7901C39006 /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -89,6 +94,14 @@
 				B8CA7DF42C5C06049D2A4F0F /* Pods.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		476BE0E61AEBC591005CF0AA /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				476BE0E71AEBCB59005CF0AA /* drip.mp3 */,
+			);
+			name = Sounds;
 			sourceTree = "<group>";
 		};
 		4782D12D1A2C7FDE0007C9DD = {
@@ -134,6 +147,7 @@
 				47EF2B9E1ACD992F00F6A56A /* SeqId.m */,
 				47EF2BA31ACEC5E700F6A56A /* PayloadStorageList.h */,
 				47EF2BA41ACEC5E700F6A56A /* PayloadStorageList.m */,
+				476BE0E61AEBC591005CF0AA /* Sounds */,
 			);
 			path = "ToWF Receiver";
 			sourceTree = "<group>";
@@ -150,6 +164,7 @@
 		81879E1D8348EFA91CD1DD23 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				476BE0EC1AEC0FA9005CF0AA /* AVFoundation.framework */,
 				72D13DAF23C5594E1498AD55 /* libPods.a */,
 			);
 			name = Frameworks;
@@ -247,6 +262,7 @@
 				4782D14A1A2C7FDE0007C9DD /* LaunchScreen.xib in Resources */,
 				474EF2981A31D10F00076F12 /* Media.xcassets in Resources */,
 				4782D1471A2C7FDE0007C9DD /* Images.xcassets in Resources */,
+				476BE0E81AEBCB59005CF0AA /* drip.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
