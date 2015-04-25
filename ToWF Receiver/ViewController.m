@@ -51,6 +51,7 @@
 #define DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING 5
 #define DG_DATA_HEADER_PAYLOAD_TYPE_ENABLE_MPRS 6
 #define DG_DATA_HEADER_PAYLOAD_TYPE_CHAT_MSG 7
+#define DG_DATA_HEADER_PAYLOAD_TYPE_RLS 8  // Request Listening State
 
 
 // OS Constants
@@ -688,6 +689,8 @@
 
             // To-Do: Beep
             
+        } else if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_RLS) {
+            [self sendClientListeningWithIsListening:isListening Port:streamPort];
         }
     } else {  // Not the INFO PORT NUMBER (7769), so must be an audio streaming port (7770, 7771, etc)
         
