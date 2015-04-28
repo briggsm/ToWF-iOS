@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7531" systemVersion="14D131" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7520"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7701"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -33,13 +33,21 @@
                                         <color key="textColor" red="0.0" green="0.0" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="(v0.0)" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fXF-Hs-oi5">
+                                        <rect key="frame" x="537" y="0.0" width="31" height="15"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="fXF-Hs-oi5" secondAttribute="trailing" id="634-oi-XGT"/>
                                     <constraint firstItem="gkP-sN-NgH" firstAttribute="top" secondItem="KgY-cV-1Yp" secondAttribute="top" id="69L-zN-rEA"/>
                                     <constraint firstAttribute="bottom" secondItem="dfU-KE-OVx" secondAttribute="bottom" id="7H2-99-XLU"/>
                                     <constraint firstAttribute="bottom" secondItem="gkP-sN-NgH" secondAttribute="bottom" id="N56-4e-ygc"/>
                                     <constraint firstItem="dfU-KE-OVx" firstAttribute="top" secondItem="KgY-cV-1Yp" secondAttribute="top" id="Vvd-KG-2ix"/>
                                     <constraint firstItem="gkP-sN-NgH" firstAttribute="leading" secondItem="dfU-KE-OVx" secondAttribute="trailing" id="b3C-Yk-cin"/>
+                                    <constraint firstItem="fXF-Hs-oi5" firstAttribute="top" secondItem="KgY-cV-1Yp" secondAttribute="top" id="bcp-fm-6uX"/>
                                     <constraint firstItem="dfU-KE-OVx" firstAttribute="baseline" secondItem="gkP-sN-NgH" secondAttribute="baseline" constant="0.5" id="eEZ-aI-98S"/>
                                     <constraint firstAttribute="trailing" secondItem="gkP-sN-NgH" secondAttribute="trailing" id="pI3-2e-aXn"/>
                                     <constraint firstItem="dfU-KE-OVx" firstAttribute="leading" secondItem="KgY-cV-1Yp" secondAttribute="leading" id="qEw-dT-bKz"/>
@@ -236,6 +244,7 @@
                         <outlet property="listeningView" destination="rCm-cl-Qad" id="itx-0E-Ae7"/>
                         <outlet property="sendMissingPacketsRequestsSwitch" destination="vzb-UU-EJQ" id="WPi-2P-hne"/>
                         <outlet property="streamView" destination="6ju-sf-9Ai" id="Csk-O7-WL2"/>
+                        <outlet property="versionLabel" destination="fXF-Hs-oi5" id="fGx-Pl-ZFA"/>
                         <outlet property="waitingForServerLabel" destination="yHJ-GU-MyQ" id="MnE-wA-GDr"/>
                         <outlet property="webView" destination="hy2-dK-anf" id="4Gj-hy-fQv"/>
                         <outlet property="wifiConnection" destination="gkP-sN-NgH" id="Xr3-Hj-lO3"/>

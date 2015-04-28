@@ -200,6 +200,7 @@
 }
 
 @property (weak, nonatomic) IBOutlet UILabel *wifiConnection;
+@property (weak, nonatomic) IBOutlet UILabel *versionLabel;
 @property (weak, nonatomic) IBOutlet UIWebView *webView;
 @property (weak, nonatomic) IBOutlet UIButton *btnStartStop;
 @property (weak, nonatomic) IBOutlet UILabel *lblReceivingAudio;
@@ -328,6 +329,9 @@
     if (err != nil) {
         NSLog(@"ERROR with dripSoundPlayer: %@", err);
     }
+    
+    // Add version # to label in GUI
+    self.versionLabel.text = [NSString stringWithFormat:@"(v%@)", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
 }
 
 - (void)didReceiveMemoryWarning {
