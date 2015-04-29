@@ -81,9 +81,11 @@
 #define LPP_NUM_PAIRS_LENGTH 1
 #define LPP_RSVD0_START (DG_DATA_HEADER_LENGTH + 1)
 #define LPP_RSVD0_LENGTH 1
-#define LPP_LANG0_START (DG_DATA_HEADER_LENGTH + 2)
+#define LPP_SERVER_VERSION_START (DG_DATA_HEADER_LENGTH + 2)
+#define LPP_SERVER_VERSION_LENGTH 10
+#define LPP_LANG0_START (DG_DATA_HEADER_LENGTH + 12)
 #define LPP_LANG_LENGTH 16
-#define LPP_PORT0_START (DG_DATA_HEADER_LENGTH + 18)
+#define LPP_PORT0_START (DG_DATA_HEADER_LENGTH + 28)
 #define LPP_PORT_LENGTH 2
 
 // Client Listening Payload
@@ -196,6 +198,8 @@
     NSString *prevSSID;
     
     AVAudioPlayer *dripSoundPlayer;
+    
+    NSString *appVersionStr;
     
 }
 
@@ -330,8 +334,10 @@
         NSLog(@"ERROR with dripSoundPlayer: %@", err);
     }
     
+    appVersionStr = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    
     // Add version # to label in GUI
-    self.versionLabel.text = [NSString stringWithFormat:@"(v%@)", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
+    self.versionLabel.text = [NSString stringWithFormat:@"(v%@)", appVersionStr];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -667,6 +673,8 @@
                 [self createAndStartNewAudioControllerAndSetup];
             }
         } else if (payloadType == DG_DATA_HEADER_PAYLOAD_TYPE_LANG_PORT_PAIRS) {
+            NSString *serverVersion = [Util getNullTermStringFromData:dgData AtOffset:LPP_SERVER_VERSION_START WithMaxLength:LPP_SERVER_VERSION_LENGTH];
+            
             uint8_t numLangPortPairs = [Util getUInt8FromData:dgData AtOffset:LPP_NUM_PAIRS_START];
             
             if (numLangPortPairs != [langPortPairs getNumPairs]) {
@@ -689,6 +697,27 @@
             if (self.languageTF.text == NULL || [self.languageTF.text isEqualToString:@""]) {
                 // Select the 1st language in the list to display in the Text Field
                 self.languageTF.text = [langPortPairs getLanguageAtIdx:0];
+                
+                // Also use this opportunity to check appVersion vs serverVersion, and alert user if they're not compatible
+                NSString *serverMajorVer = [serverVersion componentsSeparatedByString:@"."][0];
+                NSString *appMajorVer = [appVersionStr componentsSeparatedByString:@"."][0];
+                NSLog(@"serverMajorVer: %@", serverMajorVer);
+                NSLog(@"appMajorVer: %@", appMajorVer);
+                if (![serverMajorVer isEqualToString:appMajorVer]) {
+                    NSString *todoMsg;
+                    if (appMajorVer.intValue < serverMajorVer.intValue) {
+                        todoMsg = @"You need to update this app to the latest version";
+                    } else {
+                        todoMsg = @"The Server software must be updated to the latest version";
+                    }
+                    
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Versions not Compatible!"
+                                                                    message:[NSString stringWithFormat:@"This App's Version (%@) and the Server's version (%@) are not compatible. The Major version (1st number) must be the same.\n\n%@", appVersionStr, serverVersion, todoMsg]
+                                                                   delegate:nil
+                                                          cancelButtonTitle:@"OK"
+                                                          otherButtonTitles:nil];
+                    [alert show];
+                }
             }
             
             [langPicker reloadAllComponents];  // So it doesn't read from it's cache (which might be outdated).
