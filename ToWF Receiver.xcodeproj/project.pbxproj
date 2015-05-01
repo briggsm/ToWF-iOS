@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		474EF2981A31D10F00076F12 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 474EF2971A31D10F00076F12 /* Media.xcassets */; };
+		4718C27E1AF39EC9003BD3DC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4718C27D1AF39EC9003BD3DC /* Images.xcassets */; };
+		4718C2801AF39FAD003BD3DC /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4718C27F1AF39FAD003BD3DC /* Media.xcassets */; };
 		476BE0E81AEBCB59005CF0AA /* drip.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 476BE0E71AEBCB59005CF0AA /* drip.mp3 */; };
 		476BE0ED1AEC0FA9005CF0AA /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 476BE0EC1AEC0FA9005CF0AA /* AVFoundation.framework */; };
 		4782D13C1A2C7FDE0007C9DD /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4782D13B1A2C7FDE0007C9DD /* main.m */; };
 		4782D13F1A2C7FDE0007C9DD /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4782D13E1A2C7FDE0007C9DD /* AppDelegate.m */; };
 		4782D1421A2C7FDE0007C9DD /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4782D1411A2C7FDE0007C9DD /* ViewController.m */; };
 		4782D1451A2C7FDE0007C9DD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4782D1431A2C7FDE0007C9DD /* Main.storyboard */; };
-		4782D1471A2C7FDE0007C9DD /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4782D1461A2C7FDE0007C9DD /* Images.xcassets */; };
 		4782D14A1A2C7FDE0007C9DD /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4782D1481A2C7FDE0007C9DD /* LaunchScreen.xib */; };
 		47A7409D1A9210D5000E0515 /* LangPortPairs.m in Sources */ = {isa = PBXBuildFile; fileRef = 47A7409C1A9210D5000E0515 /* LangPortPairs.m */; };
 		47CEF1041A2DCE2C003EF720 /* DatagramChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = 47CEF1031A2DCE2C003EF720 /* DatagramChannel.m */; };
@@ -36,7 +36,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		474EF2971A31D10F00076F12 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
+		4718C27D1AF39EC9003BD3DC /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		4718C27F1AF39FAD003BD3DC /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		476BE0E71AEBCB59005CF0AA /* drip.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = drip.mp3; sourceTree = "<group>"; };
 		476BE0EC1AEC0FA9005CF0AA /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		4782D1361A2C7FDE0007C9DD /* ToWF Receiver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ToWF Receiver.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -47,7 +48,6 @@
 		4782D1401A2C7FDE0007C9DD /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		4782D1411A2C7FDE0007C9DD /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		4782D1441A2C7FDE0007C9DD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		4782D1461A2C7FDE0007C9DD /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		4782D1491A2C7FDE0007C9DD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		4782D14F1A2C7FDE0007C9DD /* ToWF ReceiverTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ToWF ReceiverTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		47A7409B1A9210D5000E0515 /* LangPortPairs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LangPortPairs.h; sourceTree = "<group>"; };
@@ -133,8 +133,8 @@
 				47CEF1021A2DCE2C003EF720 /* DatagramChannel.h */,
 				47CEF1031A2DCE2C003EF720 /* DatagramChannel.m */,
 				4782D1431A2C7FDE0007C9DD /* Main.storyboard */,
-				4782D1461A2C7FDE0007C9DD /* Images.xcassets */,
-				474EF2971A31D10F00076F12 /* Media.xcassets */,
+				4718C27D1AF39EC9003BD3DC /* Images.xcassets */,
+				4718C27F1AF39FAD003BD3DC /* Media.xcassets */,
 				4782D1481A2C7FDE0007C9DD /* LaunchScreen.xib */,
 				4782D1391A2C7FDE0007C9DD /* Supporting Files */,
 				47A7409B1A9210D5000E0515 /* LangPortPairs.h */,
@@ -258,10 +258,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4718C2801AF39FAD003BD3DC /* Media.xcassets in Resources */,
+				4718C27E1AF39EC9003BD3DC /* Images.xcassets in Resources */,
 				4782D1451A2C7FDE0007C9DD /* Main.storyboard in Resources */,
 				4782D14A1A2C7FDE0007C9DD /* LaunchScreen.xib in Resources */,
-				474EF2981A31D10F00076F12 /* Media.xcassets in Resources */,
-				4782D1471A2C7FDE0007C9DD /* Images.xcassets in Resources */,
 				476BE0E81AEBCB59005CF0AA /* drip.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
